@@ -1,5 +1,8 @@
 //https://anmolkoul.wordpress.com/2015/06/05/interactive-data-visualization-using-d3-js-dc-js-nodejs-and-mongodb/
 // Code for cross d3/mongo/node from https://github.com/anmolkoul/node-dc-mongo
+
+//Uses node modules to initialize data fetch from mongoDB and then host webpages over the network
+
 // modules =================================================
 var express        = require('express');
 var app            = express();
@@ -10,11 +13,11 @@ var methodOverride = require('method-override');
 // configuration ===========================================
 	
 // config files
-var port = process.env.PORT || 8080; // set our port
+var port = process.env.PORT || 8000; // set our port
 var db = require('./config/db');
 
 // connect to our mongoDB database (commented out after you enter in your own credentials)
-connectionsubject = mongoose.createConnection(db.urlSubjectViews);
+connection = mongoose.createConnection(db.urlNYPhil);
 
 
 
@@ -24,7 +27,7 @@ app.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse applica
 app.use(bodyParser.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
 
 app.use(methodOverride('X-HTTP-Method-Override')); // override with the X-HTTP-Method-Override header in the request. simulate DELETE/PUT
-app.use(express.static(__dirname + '/public')); // set the static files location /public/img will be /img for users
+app.use(express.static(__dirname + '/src')); // set the static files location /public/img will be /img for users
 
 // routes ==================================================
 require('./app/routes')(app); // pass our application into our routes

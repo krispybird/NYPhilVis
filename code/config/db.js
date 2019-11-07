@@ -1,4 +1,5 @@
+//Contains the database information i.e. the address and the port to connect to
 module.exports = {
-	urlSubjectViews: 'mongodb://localhost:27017/NYPhil',
+	urlNYPhil: 'mongodb://localhost:27017/NYPhil',
 
 }

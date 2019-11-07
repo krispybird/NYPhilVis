@@ -1,0 +1,248 @@
+@import url('https://fonts.googleapis.com/css?family=Abril+Fatface&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Forum&display=swap');
+/*
+class: .className{}
+id: #idName
+*/
+
+html {
+	/* layout - default is hidden*/
+	/*font-family: 'Architects Daughter', cursive;*/
+	overflow: hidden;
+}
+
+body {
+	color: white;
+
+	/* layout */
+	padding: 0;
+	margin: 0;
+	
+	/* text */
+	font-family: 'Helvetica';
+	font-size: 1em;
+	overflow: auto;
+	/*//min-width:  1200px;
+	/*min-height: 700px;*/
+}
+
+button {
+	border: none;
+	background: rgba(150, 150, 150, 0);
+	color: gray;
+	cursor: pointer;
+
+	float: right;
+	padding: 5px;
+	
+	text-transform: lowercase;
+}
+
+.title_panel{
+	text-align: center;
+	font-family: 'Forum', cursive;
+	float: auto;
+	width: auto;
+}
+
+h1 {
+
+	color: black;
+	/* layout */
+	margin: 0;
+	padding-top: 0.15em;
+	padding-left: 0.15em;
+	padding-right: 0.15em;
+	padding-bottom: 0.05em;
+	
+	/* text */
+	font-weight: 700;
+	font-size: 3em;
+	text-align: center;
+	/*text-transform: uppercase;*/
+
+
+}
+
+h2{
+	font-weight: 10;
+	font-size: 0.75em;
+	text-transform: lowercase;
+}
+
+.control_panel{
+	padding-top: 0.3em;
+	position: absolute;
+	/*z-index: 100;*/
+	width: 100%;
+}
+
+
+h3{
+	/*visibility:hidden; 
+	display:none;
+	*/
+	font-family: 'Metamorphous';
+	
+}
+
+.load_splash{
+	/*visibility: visible;
+	float: center;*/
+	/*width: 100%;*/
+	height: 75%;
+	top: 60%;
+	left: 50%;
+	margin-top: -128px;
+	margin-left: -128px;
+	text-align: center;
+	position: absolute;
+	/*z-index: 101;*/
+}
+
+.filter_panel{
+	float: right;
+	font-family: 'Helvetica';
+
+}
+
+.filter-box{
+	display:block;
+	width:25px;
+	height:25px;
+	border-radius:12.5px;
+	/*font-size:20px;*/
+	color:green;
+	line-height:100px;
+	text-align:center;
+	text-decoration:none;
+	background:green;
+}
+/*
+.level-1{
+	color: green;
+	
+}
+*/
+
+
+.filter-box:hover{
+	color:#ccc;
+	text-decoration:none;
+	background:#333;
+}
+
+.base {
+	fill: navy;
+}
+
+.base:hover {
+	color: silver;
+	stroke-opacity: .5;
+}
+
+.node rect {
+  cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+}
+
+.node circle {
+	cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+  fill: gray;
+}
+
+.node text {
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+  font-size: 10px;
+  font-weight: 500;
+  color: #000;
+}
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+
+.link:hover {
+  stroke-opacity: .5;
+}
+
+.trunk{
+  fill: #000;
+  /*stroke: #000;*/
+  fill-opacity: .2;
+  stroke-opacity: .2;
+  opacity: .8;
+}
+
+.trunk:hover {
+ stroke-opacity: .5;
+ opacity: 1;
+}
+
+div.tooltip {   
+  position: absolute;           
+  text-align: center;           
+  width: auto;
+  height: auto;
+  /*
+  width: 60px;                  
+  height: 28px;   
+*/  
+  padding: 2px;             
+  font: 12px sans-serif;        
+  background: lightsteelblue;   
+  border: 0px;      
+  border-radius: 8px;           
+  pointer-events: none;         
+}
+.mySelect {
+    padding: .2em 0;
+    font-size: 1em;
+}
+#slider{
+	height: 100%;
+	display: none;
+    background: transparent;
+	overflow: auto;
+	opacity: 1;
+    color: #FFF;
+    padding: 10px;
+	position: absolute;
+	left: 0;
+	width: 15%;
+	
+	text-align: justified;
+	font: 12px sans-serif;        
+	background: gray;   
+}
+/*
+	
+	margin: 0;
+	padding: 0;
+	position: absolute;
+	z-index: 1;
+
+}
+
+img.fbblogo{
+	
+	
+	background: transparent;
+	text-align: center;
+	position: fixed;
+	top: 60%;
+	left: 50%;
+	margin-top: -128px;
+	margin-left: -128px;
+	z-index:101;
+	cursor: pointer;
+	
+	
+}
+*/
