@@ -3,8 +3,12 @@ var canvas;
 var context;
 var svg;
 
+//var programArray;
 
-var programs = {};
+
+var programs, years = [];	//stored 
+var tempProgs = {};
+
 //var concerts = {};
 var works = [];	//use array instead of keys because works can be duplicated with different fields 
 
@@ -17,34 +21,24 @@ var composerMetadata = {};
 var conductorMetadata = {};
 //var totalSeasons = {};
 
+var SVGS = {};	//keep track of all charts
 
-
-var filePath = "../data/complete.json";
-v//ar filePath = "data/1842-43_TO_1910-11.json";
-var filePath = "data/test.json";
+var filePath;
+filePath = "../data/complete.json";
+//filePath = "data/1842-43_TO_1910-11.json";
+//filePath = "data/test.json";
 
 var margin = {top: 10, right: 10, bottom: 10, left: 10},
     width = screen.width - margin.left - margin.right,
-    height = screen.height -80- margin.top - margin.bottom;
+    height = screen.height - margin.top - margin.bottom;
 
+var tooltip;
+//interpolate between the min and max
+const colorsYears = ['#ffffff','#ffffe0', '#c5eddf', '#a5d5d8', '#8abccf', '#73a2c6', '#5d8abd', '#4771b2', '#2e59a8', '#00429d'];
+['#ffffe0', '#caefdf', '#abdad9', '#93c4d2', '#7daeca', '#6997c2', '#5681b9', '#426cb0', '#2b57a7', '#00429d']
 function initialize(){
 	
-	//defer until sankey is done loading
-	/*$.getScript('js/sankey.js', function()
-	{
-		visas = new Visa();
-		advisories = new Advisory();
-		continents = new Continent();
-		visa_lengths = new visaDuration();
-		
-		sankey = d3.sankey()
-			.nodeWidth(5)
-			.nodePadding(5)
-			.size([width, height]);
-		path = sankey.link();
-		
-		fetchData();
-	});	*/
+	
 
 	fetchData();
 }
@@ -55,20 +49,25 @@ function fetchData(){
 	d3.json(filePath).then(function(data){
 	/*d3.json(filePath, function(error, f){
 		if (error) throw error;*/
-
-		
-		var row;
+	
+		var row, progID;
 		var w;
 		var concert, work, soloist, season, comp, cond;
+		
 
+		//var s = Object.entries(programs).map(([key, value]) => ({key,value}));
 		for (i in data.programs){
 			row = data.programs[i];
+			progID = row.programID;
 			
 			delete row.id;
+			delete row.progamID;
 
 			//discard after the dash as the dataset already assumes a season is 1 year long and transform to int
 			row.season = +row.season.split("-")[0];
-			programs[row.programID] = row;
+			//instead of storing as one object, restructure it to store as a key value array
+			tempProgs[row.programID] = row;
+
 			
 			if (seasons[row.season] == undefined){
 				seasons[row.season] = {
@@ -177,104 +176,225 @@ function fetchData(){
 			}
 		
 		}
+		graphYears();
+	});
 
-		readData();
-
-		//formatJSON(filePath, readData);
-		//readData();
-	})/*.then(readData());*/
-	/*.then(function(data){
-		readData();
-	});*/
 
 }
 
-function readData(){
-	//console.log(programs);
-	svg = d3.select("body").append("svg").attr("width", $("body").innerWidth()).attr("height", $("body").innerHeight());
+/////////////////////GRAPHS
+//this graph visualizes in groupings of decades on the number of 
+function graphYears(){
+
+	//arrays for now
+	programs = Object.entries(tempProgs).map(([key, value]) => ({key,value}));
+	years = Object.entries(seasons).map(([key, value]) => ({key,value}));
+	
+	svg = d3.select("body").append("div").append("div")
+   .attr("class", "svg-container")
+
+
+	.append("svg")
+		//.attr("width", window.innerWidth * .9)
+		//.attr("height", window.innerHeight)
+		.attr("class", "svg")
+		.attr("display", "block")
+		.attr("viewBox", "0 0 " + width + " " + height )
+        .attr("preserveAspectRatio", "xMinYMin meet")
+        .attr("class", "svg-content-responsive")
+		//.attr("overflow", "auto");
+
+
+
+	SVGS["yearChart"] = svg;
+
+	tooltip = d3.select("body").append("div")   
+    .attr("class", "tooltip")               
+    .style("opacity", 0);
+
+	//redefine this to be the size of the svg instead
+	var gridSize = Math.floor(width/10)/3,
+		buckets = 10,
+		legendBoxWidth = gridSize*2,
+		minScale = returnMinValueObject(years, "total")["total"],
+		maxScale = returnMaxValueObject(years, "total")["total"];
+	
+	var startYear =  Object.values(years).map(v => v.key).reduce(function(a, b){
+		return a < b ? a : b}),
+	endYear = Object.values(years).map(v => v.key).reduce(function(a, b){
+		return a > b ? a : b});
+
+	var min = Math.floor(startYear/10);
+	var max = Math.floor(endYear/10);
+
+
+
+	const yAxisOffset = 20;
+
+	//Object.values(years).map(v => v.value.total)
+	//returns total programs played
+	const colorScaleYears = d3.scaleQuantile()
+	.domain(Object.values(years).map(v => v.value.total).sort((a,b) => a-b))
+	.range(colorsYears);
+
+	
 
 	var g = svg.append("g")
 			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-			.attr("class", "charts");
+			.attr("class", "charts")
+			/*.attr("width")*/
 
+	
+	//maps out years
+	//Object.values(years).map(v => +v.key)
+	var yearLabel = g.append("g").attr("class", "axis").selectAll(".yearLabel")
+		.data(Array.from(Array(10).keys()))
+		.enter().append("text")
+		.text(function(d) {return "_" + d;})
+		.attr("class", "yearLabel axis")
+		.attr("x", function(d, i){
+			return (i+1)*gridSize + gridSize/2;
+		})
+		.attr("y", 10)
+		.style("text-anchor", "middle")
+		.attr("transform", "translate(" + gridSize/2 + ", -6 )");
 
-		var count = 0;
-		var bar = g.selectAll(".bar")
-	      .data(programs)
-	      .enter().append("rect")
-	        .attr("class", "bar")
-	        .attr("x", function(d, i){return 50*(i+1)})
-	        .attr("y", function(d, i){return 30*(i+1)})
-	        .attr("width", 30)
-	        .attr("height", 30);
-	        
+	var decadeLabel = g.append("g").attr("class", "axis").selectAll(".decadeLabel")
+		.data(Array.from({length:(max+1-min)}, (_, i) => min + (i)))
+		.enter().append("text")
+		.text(function(d) {return d + "0s";})
+		.attr("class", "yearLabel axis")
+		.attr("x", 0)
+		.attr("y", function(d, i){
+			return ((i+1)*gridSize) - gridSize/2;
+		})
+		.style("text-anchor", "start")
+		.attr("transform", "translate(0," + gridSize/2 +" )");
+	
 
-	        bar.append("text")
-				.attr("dy", ".22em")//.18
-				.attr("x", function(d) { return d.children || d._children ? -13 : 13;})
-				.attr("text-anchor", function(d) {
-				  return d.children || d._children ? "end" : "start";
-				})
-				//.attr("text-anchor", function(d) { return d.x > 130 ? "start" : "end"; })
-				.on("mouseover", function(d) {
-				    div.transition()        
-				        .duration(200)      
-				        .style("opacity", .9);      
-				    div.html("Orchestra: " + d.orchestra)  
-				        .style("left", (d3.event.pageX) + "px")     
-				        .style("top", (d3.event.pageY - 28) + "px");    
-				    })
-					/*.on("click", function(d) {
-						$("#slide").slideToggle();
-						slide.style('display', 'visible');
-						slide.html("Countries: " + "<br/>"  + parseCountries(d));
-				    })*/
-				.on("mouseout", function(d) {
-				    div.transition()        
-				        .duration(500)      
-				        .style("opacity", 0);   
-				})
-	        	.text( function(d){return d.season})
+	var bars = g.append("g")
+		.attr("class", "bars")
+		.attr("transform", "translate(20," + 20 + ")")
+		.selectAll(".year")
+      	.data(years)
+      	.enter()
+      	.append('rect')
+      	.attr("class", "year border")
+        .attr("x", function(d, i){
+        	return gridSize + (+d.key % buckets) * gridSize})
+        .attr("y", function(d, i){
+        	return((Math.floor(+d.key/10) - min) * gridSize)})
+        .attr("rx", 4)
+        .attr("ry", 4)
+        .attr("width", gridSize)
+        .attr("height", gridSize)
+        .style("fill", function(d,i){
+        	/*console.log(colorScaleYears(d.value.total));*/
+        	return colorScaleYears(d.value.total)
+        })
+        .on("mouseover", function(d) {
+		    tooltip.transition()        
+		        .duration(200)      
+		        .style("opacity", .9);      
+		    tooltip.html("Total: " + d.value.total)  
+		        .style("left", (d3.event.pageX) + "px")     
+		        .style("top", (d3.event.pageY - 28) + "px");    
+		    })
+			/*.on("click", function(d) {
+				$("#slide").slideToggle();
+				slide.style('display', 'visible');
+				slide.html("Countries: " + "<br/>"  + parseCountries(d));
+		    })*/
+		.on("mouseout", function(d) {
+		    tooltip.transition()        
+		        .duration(500)      
+		        .style("opacity", 0);   
+		});
+		
+		var legend = g.append("g")
+		.attr("class", "legend")
+		.attr("transform", "translate(20,50)")// + 0 + ")")
+		.selectAll(".legend")
+      	.data(colorScaleYears.quantiles())
+      	.enter();
 
-	/*var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
-	    y = d3.scaleLinear().rangeRound([height, 0]);
+      	console.log(colorScaleYears.quantiles())
+      	legend.append("rect")
+      	.attr("class", "box")
+      	.attr("width", gridSize*10/(colorsYears.length-1))
+      	.attr("height", gridSize)
+      	.attr("x", (d,i)=> (gridSize+(i*gridSize*10/(colorsYears.length-1))))
+      	.attr("y", d3.select(".bars").node().getBBox().height)
+      	.style("fill", function(d,i){
+      		return colorsYears[i+1];
+      	})	//do this because quantiles return n-1, so we have an extra as placeholder
+      	legend.append("text").attr("class", "legend")
+      	      	.text((d,i)=> ">=" + Math.round(colorScaleYears.quantiles()[i]))
+      			.attr("x", function(d, i){
+      				return gridSize*1.25+(i*gridSize*10/(colorsYears.length-1))})
+      			.attr("y", d3.select(".legend").node().getBBox().height + 20)
+      			.style("text-anchor", "center")
 
+      	//console.log(colorScaleYears.quantile())
+		/*g.append("rect")
+		.attr("class", "fake border")
+        .attr("x", function(){
+        	return gridSize })
+        .attr("y", function(d, i){
+        	return( gridSize)})
+        .attr("rx", 4)
+        .attr("ry", 4)
+        .attr("width", gridSize)
+        .attr("height", gridSize)
+        .style("fill", function(d,i){
+        	return 'gray';});*/
 
+		
 
-	    
-	var g = svg.append("g")
-	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+		
+        //.style("fill", colorsYears[0])
+        /*.merge(bars)
+        .transition().duration(1000)
+        .style("fill", function(d,i){
+        	return colorScale(d[i].value.total)
+        })*/
 
-	d3.tsv("data.tsv", function(d) {
-	  d.frequency = +d.frequency;
-	    return d;
-	  }, function(data) {
-	 
-	    x.domain(data.map(function(d) { return d.letter; }));
-	    y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+		 
+        
 
-	    g.append("g")
-	      .attr("transform", "translate(0," + height + ")")
-	      .call(d3.axisBottom(x));
+        /*bar.append("text")
+			.attr("dy", ".22em")//.18
+			.attr("x", function(d) { return d.children || d._children ? -13 : 13;})
+			.attr("text-anchor", function(d) {
+			  return d.children || d._children ? "end" : "start";
+			})
+			.on("mouseover", function(d) {
+			    div.transition()        
+			        .duration(200)      
+			        .style("opacity", .9);      
+			    div.html("Orchestra: " + d.orchestra)  
+			        .style("left", (d3.event.pageX) + "px")     
+			        .style("top", (d3.event.pageY - 28) + "px");    
+			    })
+				.on("click", function(d) {
+					$("#slide").slideToggle();
+					slide.style('display', 'visible');
+					slide.html("Countries: " + "<br/>"  + parseCountries(d));
+			    })
+			.on("mouseout", function(d) {
+			    div.transition()        
+			        .duration(500)      
+			        .style("opacity", 0);   
+			})
+        	.text( function(d){return d.season})*/
 
-	    g.append("g")
-	      .call(d3.axisLeft(y).ticks(10, "%"));
-
-	    g.selectAll(".bar")
-	      .data(data)
-	      .enter().append("rect")
-	        .attr("class", "bar")
-	        .attr("x", function(d) { return x(d.letter); })
-	        .attr("y", function(d) { return y(d.frequency); })
-	        .attr("width", x.bandwidth())
-	        .attr("height", function(d) { return height - y(d.frequency); });
-
-	});*/
 
 	
 }
 
 function redraw(){
-	;
+	$("body").attr("width", window.innerWidth);
+	$("body").attr("height", window.innerHeight);
+
 }
 window.addEventListener("resize", redraw);

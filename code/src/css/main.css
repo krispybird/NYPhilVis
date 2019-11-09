@@ -8,7 +8,7 @@ id: #idName
 html {
 	/* layout - default is hidden*/
 	/*font-family: 'Architects Daughter', cursive;*/
-	overflow: hidden;
+	overflow-y: scroll;
 }
 
 body {
@@ -22,8 +22,29 @@ body {
 	font-family: 'Helvetica';
 	font-size: 1em;
 	overflow: auto;
+	text-anchor: left;
 	/*//min-width:  1200px;
 	/*min-height: 700px;*/
+}
+
+/*svg {
+	display: block;
+	margin: auto;
+	text-align: center;
+}*/
+.svg-container {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 50%; /* aspect ratio */
+    vertical-align: top;
+    overflow: hidden;
+}
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 0;
 }
 
 button {
@@ -86,6 +107,14 @@ h3{
 	
 }
 
+g{
+	display: inherit;
+}
+
+.charts{
+	/*width: 85%;
+	height: auto;*/
+}
 .load_splash{
 	/*visibility: visible;
 	float: center;*/
@@ -221,28 +250,13 @@ div.tooltip {
 	font: 12px sans-serif;        
 	background: gray;   
 }
-/*
-	
-	margin: 0;
-	padding: 0;
-	position: absolute;
-	z-index: 1;
 
+rect.bordered{
+	stroke: "#f7f7f5";
+	stroke-width: 5px;
 }
 
-img.fbblogo{
-	
-	
-	background: transparent;
-	text-align: center;
-	position: fixed;
-	top: 60%;
-	left: 50%;
-	margin-top: -128px;
-	margin-left: -128px;
-	z-index:101;
-	cursor: pointer;
-	
-	
+.axis{
+	font: 1em sans-serif;
+	text-align: justified;
 }
-*/
