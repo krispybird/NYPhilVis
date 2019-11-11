@@ -1,4 +1,5 @@
 
+
 var canvas;
 var context;
 var svg;
@@ -34,8 +35,8 @@ var margin = {top: 10, right: 10, bottom: 10, left: 10},
 
 var tooltip;
 //interpolate between the min and max
-const colorsYears = ['#ffffff','#ffffe0', '#c5eddf', '#a5d5d8', '#8abccf', '#73a2c6', '#5d8abd', '#4771b2', '#2e59a8', '#00429d'];
-['#ffffe0', '#caefdf', '#abdad9', '#93c4d2', '#7daeca', '#6997c2', '#5681b9', '#426cb0', '#2b57a7', '#00429d']
+// const colorsYears = ['#ffffff','#ffffe0', '#c5eddf', '#a5d5d8', '#8abccf', '#73a2c6', '#5d8abd', '#4771b2', '#2e59a8', '#00429d'];
+const colorsYears = ['#ffffe0', '#caefdf', '#abdad9', '#93c4d2', '#7daeca', '#6997c2', '#5681b9', '#426cb0', '#2b57a7', '#00429d']
 function initialize(){
 	
 	
@@ -209,7 +210,7 @@ function graphYears(){
 	SVGS["yearChart"] = svg;
 
 	tooltip = d3.select("body").append("div")   
-    .attr("class", "tooltip")               
+    .attr("class", "tooltip top")               
     .style("opacity", 0);
 
 	//redefine this to be the size of the svg instead
@@ -236,6 +237,9 @@ function graphYears(){
 	const colorScaleYears = d3.scaleQuantile()
 	.domain(Object.values(years).map(v => v.value.total).sort((a,b) => a-b))
 	.range(colorsYears);
+
+	const totalYearsInQuantiles =  
+	sumToQuantileRanges(years,colorScaleYears.quantiles());
 
 	
 
@@ -293,6 +297,9 @@ function graphYears(){
         	return colorScaleYears(d.value.total)
         })
         .on("mouseover", function(d) {
+		    /*tippy(tooltip.html("Total: " + d.value.total)  
+		        .style("left", (d3.event.pageX) + "px")     
+		        .style("top", (d3.event.pageY - 28) + "px"))*/
 		    tooltip.transition()        
 		        .duration(200)      
 		        .style("opacity", .9);      
@@ -319,22 +326,46 @@ function graphYears(){
       	.enter();
 
       	console.log(colorScaleYears.quantiles())
+
       	legend.append("rect")
       	.attr("class", "box")
-      	.attr("width", gridSize*10/(colorsYears.length-1))
+      	.attr("width", gridSize)//*10/(colorsYears.length-1))
       	.attr("height", gridSize)
       	.attr("x", (d,i)=> (gridSize+(i*gridSize*10/(colorsYears.length-1))))
       	.attr("y", d3.select(".bars").node().getBBox().height)
       	.style("fill", function(d,i){
-      		return colorsYears[i+1];
+      		return i >= 9 ? "00429d" : colorsYears[i];
       	})	//do this because quantiles return n-1, so we have an extra as placeholder
+      	.on("mouseover", function(d,i) {
+		    tooltip.transition()        
+		        .duration(200)      
+		        .style("opacity", .9);      
+		    tooltip.html("Total number of years: " + totalYearsInQuantiles[i])	//upper bound  with " + "≤" + Math.ceil(colorScaleYears.quantiles()[i]-1) + " concerts: " +
+		        .style("left", (d3.event.pageX) + "px")     
+		        .style("top", (d3.event.pageY - 28) + "px")
+		})
+		.on("mouseout", function(d) {
+		    tooltip.transition()        
+		        .duration(500)      
+		        .style("opacity", 0);   
+		});
+
       	legend.append("text").attr("class", "legend")
-      	      	.text((d,i)=> ">=" + Math.round(colorScaleYears.quantiles()[i]))
+      	      	.text((d,i)=>  "≤" + Math.ceil(colorScaleYears.quantiles()[i]-1))
       			.attr("x", function(d, i){
-      				return gridSize*1.25+(i*gridSize*10/(colorsYears.length-1))})
+      				return gridSize*1.1+(i*gridSize*10/(colorsYears.length-1))})
       			.attr("y", d3.select(".legend").node().getBBox().height + 20)
       			.style("text-anchor", "center")
 
+      		legend.append("text").attr("class", "h6 legend")
+      	      	.text("Total concerts played in year")
+      			.attr("x", function(d, i){
+      				return gridSize*1.1+(2*gridSize*10/(colorsYears.length-1))})
+      			.attr("y", d3.select(".legend").node().getBBox().height + 20)
+      			.style("text-anchor", "center")
+
+      	svg.attr("viewBox", "0 0 " + width + " " + (d3.select(".legend").node().getBBox().y + +d3.select(".legend").node().getBBox().height + 100))
+      	.attr("preserveAspectRatio", "xMinYMin meet");
       	//console.log(colorScaleYears.quantile())
 		/*g.append("rect")
 		.attr("class", "fake border")

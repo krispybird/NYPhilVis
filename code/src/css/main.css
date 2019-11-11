@@ -12,20 +12,24 @@ html {
 }
 
 body {
-	color: white;
+	color: black;
 
 	/* layout */
 	padding: 0;
 	margin: 0;
 	
 	/* text */
-	font-family: 'Helvetica';
+	/*font-family: 'Helvetica';*/
+	font-family: 'Forum', cursive;
+	
 	font-size: 1em;
 	overflow: auto;
 	text-anchor: left;
 	/*//min-width:  1200px;
 	/*min-height: 700px;*/
 }
+
+
 
 /*svg {
 	display: block;
@@ -36,7 +40,7 @@ body {
     display: inline-block;
     position: relative;
     width: 100%;
-    padding-bottom: 50%; /* aspect ratio */
+    padding-bottom: 100%; /* aspect ratio */
     vertical-align: top;
     overflow: hidden;
 }
@@ -45,6 +49,11 @@ body {
     position: absolute;
     top: 10px;
     left: 0;
+}
+
+.essay{
+	padding: 0 15%;
+	font-size: 1.5em;
 }
 
 button {
@@ -88,6 +97,12 @@ h1 {
 h2{
 	font-weight: 10;
 	font-size: 0.75em;
+	text-transform: lowercase;
+}
+
+h6{
+	font-size: 1.5em;
+	text-anchor: center;
 	text-transform: lowercase;
 }
 
@@ -214,22 +229,19 @@ g{
  opacity: 1;
 }
 
-div.tooltip {   
+/*div.tooltip {   
   position: absolute;           
   text-align: center;           
   width: auto;
   height: auto;
-  /*
-  width: 60px;                  
-  height: 28px;   
-*/  
+ 
   padding: 2px;             
   font: 12px sans-serif;        
   background: lightsteelblue;   
   border: 0px;      
   border-radius: 8px;           
   pointer-events: none;         
-}
+}*/
 .mySelect {
     padding: .2em 0;
     font-size: 1em;

@@ -32,3 +32,57 @@ function returnMaxValueObject(arr, k){
 		return a[k] > b[k] ? a : b
 	});
 }
+
+function sumToQuantileRanges(sumArr, quantArr){
+	////d.value.total
+
+	//var lowerBound = (upperBound == 0) ? 0 : quantArr[upperBound-1];
+	var totalArr = new Array(quantArr.length).fill(0);
+
+	var j = 0;
+	console.log(totalArr)
+	acc = false;
+
+	//not the most efficient loop since it will go through sumArr.len * quantArr.len regardless, but check what was wrong with the code below
+	for (i in sumArr){
+		for (j in quantArr){
+
+			if (j == 0){
+				if (sumArr[i].value.total < quantArr[j])
+					totalArr[j]++;//= sumArr[i].value.total;
+					console.log(sumArr[i].key)
+			}
+			else if (j == quantArr.length-1){
+				if (sumArr[i].value.total < quantArr[j])
+					totalArr[j]++;
+					console.log(sumArr[i].key)
+			}
+			else{
+				if (sumArr[i].value.total < quantArr[j]){
+					totalArr[j-1]++;
+					console.log(sumArr[i].key)
+				}
+			}
+		}
+
+		/*j = 0;
+
+		while (sumArr[i].value.total < quantArr[j] && j < quantArr.length){			
+			console.log(sumArr[i].value.total + " " + quantArr[j])
+			j++;
+		}
+
+		console.log("Total values of i, j : " + i + " " + j + " " + sumArr[i].value.total)
+
+		if (j == 0){
+			totalArr[j] += sumArr[i].value.total;
+		}
+		else{
+			totalArr[j+1] += sumArr[i].value.total;
+		}
+
+		j = 0*/
+	}
+
+	return totalArr;
+}
