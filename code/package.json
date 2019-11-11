@@ -8,7 +8,7 @@
     "d3-fetch": "^1.1.2",
     "express": "~4.5.1",
     "method-override": "~2.0.2",
-    "mongoose": "~3.8.0",
+    "mongoose": "~5.7.5",
     "tippy.js": "^5.1.1"
   }
 }
