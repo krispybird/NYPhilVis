@@ -248,7 +248,7 @@ function graphYears(){
 			.attr("class", "charts")
 			/*.attr("width")*/
 
-	
+	//
 	//maps out years
 	//Object.values(years).map(v => +v.key)
 	var yearLabel = g.append("g").attr("class", "axis").selectAll(".yearLabel")
