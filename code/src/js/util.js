@@ -34,14 +34,9 @@ function returnMaxValueObject(arr, k){
 }
 
 function sumToQuantileRanges(sumArr, quantArr){
-	////d.value.total
-
-	//var lowerBound = (upperBound == 0) ? 0 : quantArr[upperBound-1];
 	var totalArr = new Array(quantArr.length).fill(0);
 
-	var j = 0;
-	console.log(totalArr)
-	acc = false;
+	let j = 0;
 
 	//not the most efficient loop since it will go through sumArr.len * quantArr.len regardless, but check what was wrong with the code below
 	for (i in sumArr){

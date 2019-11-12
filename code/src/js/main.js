@@ -51,9 +51,9 @@ function fetchData(){
 	/*d3.json(filePath, function(error, f){
 		if (error) throw error;*/
 	
-		var row, progID;
-		var w;
-		var concert, work, soloist, season, comp, cond;
+		let row, progID;
+		let w;
+		let concert, work, soloist, season, comp, cond;
 		
 
 		//var s = Object.entries(programs).map(([key, value]) => ({key,value}));
