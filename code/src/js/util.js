@@ -40,7 +40,7 @@ function returnMaxValueObject(arr, k){
 
 
 //iterate through sum array and add how many performances in each year fall into the quantile ranges
-function sumToQuantileRanges(sumArr, quantArr){
+function sumToQuantileRanges(sumArr, quantArr, field){
 	var totalArr = new Array(quantArr.length).fill(0);
 
 	let j = 0;
@@ -48,7 +48,7 @@ function sumToQuantileRanges(sumArr, quantArr){
 	for (i in sumArr){
 		j = 0;
 		//if value is < Q1, fall into Q1. = Q1 falls into Q2
-		while (sumArr[i].value.total >= quantArr[j] && j < quantArr.length){			
+		while (sumArr[i].value[field] >= quantArr[j] && j < quantArr.length){			
 			j++;
 		}
 		totalArr[j]++;	

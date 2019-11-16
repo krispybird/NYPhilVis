@@ -7,8 +7,9 @@ var svg;
 //var programArray;
 
 
-var programs, years = [];	//stored 
+var programs, years, concerts= [];	//stored 
 var tempProgs = {};
+var tempConcerts = {};
 
 //var concerts = {};
 var works = [];	//use array instead of keys because works can be duplicated with different fields 
@@ -91,19 +92,25 @@ function fetchData(){
 			//discard after the dash as the dataset already assumes a season is 1 year long and transform to int
 			row.season = +row.season.split("-")[0];
 			//instead of storing as one object, restructure it to store as a key value array
+
+			
+			//get a total count of all concerts played
+			
 			tempProgs[row.programID] = row;
 
 			
 			if (seasons[row.season] == undefined){
 				seasons[row.season] = {
 					"total": 1,
-					"indexOfPrograms": [i]
+					"indexOfPrograms": [i],
+					"totalConcerts": row.concerts.length
 				}
 			}
 
 			else{
 				seasons[row.season].total +=1;
 				seasons[row.season].indexOfPrograms.push(i);
+				seasons[row.season].totalConcerts += row.concerts.length;
 			}
 
 			w = row.works;
@@ -227,7 +234,7 @@ function graphYears(){
 
 	///concerts;
 	years = Object.entries(seasons).map(([key, value]) => ({key,value}));
-	
+
 	svg = d3.select("body").append("div").append("div")
   	.attr("class", "svg-container")
 	.append("svg")
@@ -270,11 +277,12 @@ function graphYears(){
 	//Object.values(years).map(v => v.value.total)
 	//returns total programs played
 	const colorScaleYears = d3.scaleQuantile()
-	.domain(Object.values(years).map(v => v.value.total).sort((a,b) => a-b))
+	//.domain(Object.values(years).map(v => v.value.total).sort((a,b) => a-b)) //domain with programs
+	.domain(Object.values(years).map(v => v.value.totalConcerts).sort((a,b) => a-b))
 	.range(colorsYears);
 
 	const totalYearsInQuantiles =  
-	sumToQuantileRanges(years,colorScaleYears.quantiles());
+	sumToQuantileRanges(years,colorScaleYears.quantiles(), "totalConcerts");
 
 	
 	var g = svg.append("g")
@@ -282,7 +290,12 @@ function graphYears(){
 			.attr("class", "charts")
 			/*.attr("width")*/
 
-	
+	var axisLabels = g.attr("class", "axis").selectAll(".legend").append("text")
+		.text("Year")
+		.attr("x", 0)
+		.attr("y", 10)
+		.style("text-anchor", "middle")
+		.attr("transform", "translate(" + g.node().getBBox().width/2 + ", -15 )");
 	//maps out years
 	//Object.values(years).map(v => +v.key)
 	var yearLabel = g.append("g").attr("class", "axis").selectAll(".yearLabel")
@@ -327,10 +340,10 @@ function graphYears(){
         .style("fill", function(d,i){
         	return '#fffeee'//colorScaleYears(d.value.total)
         })
-        .attr('data-tippy-content', function(d){return "Total: " + d.value.total})
+        .attr('data-tippy-content', function(d){return "Total concerts performed: " + d.value.totalConcerts})
 
         bars.transition().duration(1500).style("fill", function(d,i){
-        	return colorScaleYears(d.value.total)
+        	return colorScaleYears(d.value.totalConcerts)
         })
 
 
@@ -405,17 +418,30 @@ function graphYears(){
       			.attr("x", function(d, i){
       				return margin.left + gridSize*1.1+(i*gridSize*10/(colorsYears.length-1))})
       			.attr("y", d3.select(".legend").node().getBBox().height + 10)
-      			.style("text-anchor", "center")
+      			.style("text-anchor", "middle")
 
-      		legend.append("text").attr("class", "legend")
-      	      	.text("Total concerts played in year")
-      			.attr("x", function(d, i){
-      				return gridSize*1.5+(gridSize*10/(colorsYears.length-1))})
-      			.attr("y", d3.select(".legend").node().getBBox().height + 20)
-      			.style("text-anchor", "center")
+      	let size = d3.select('.legend').node().getBBox();
 
-      	g.attr("transform", "translate(" + svg.node().getBBox().width/2 + "," + margin.top + ")")
-			
+      	d3.select(".legend").append("text").attr("class", "legend")
+      	      	.text("Concerts played per year")
+      			.attr("x", (d, i) => size.width/4 + size.x) //function(d, i){return gridSize*1.5+(gridSize*10/(colorsYears.length-1))})
+      			.attr("y", size.height + size.y + 15)
+      			.style("text-align", "middle")
+
+
+      		d3.select(".legend").append("text").attr("class", "legend")
+      	      	.text((d) => ("Total concerts played to date: " + years.flatMap(v => v.value.totalConcerts).reduce((a, b) => a + b, 0)))
+      			.attr("x", size.width/2 + size.x)/*function(d, i){
+      				return gridSize*1.5+(gridSize*10/(colorsYears.length-1))})*/
+      			.attr("y", d3.select(".legend").node().getBBox().height + 10)
+      			.style("font-size", "1em")
+      			.style("text-anchor", "middle")
+
+
+      	let w =  svg.node().getBBox().width/2 + g.node().getBBox().width/2;
+
+      	g.attr("transform", "translate(" + w + "," + margin.top + ")")
+		console.log(w);
       	svg.attr("viewBox", "0 0 " + width*3/4  + " " + (g.node().getBBox().y + +g.node().getBBox().height + 30))
       	.attr("preserveAspectRatio", "xMinYMin meet")
       	//.attr("width", d3.select(".charts").node().getBBox().width)
