@@ -30,18 +30,42 @@ filePath = "../data/complete.json";
 //filePath = "data/test.json";
 
 var margin = {top: 10, right: 10, bottom: 10, left: 10},
-    width = screen.width - margin.left - margin.right,
-    height = screen.height - margin.top - margin.bottom;
+    width = window.innerWidth - margin.left - margin.right,
+    height = window.innerHeight - margin.top - margin.bottom;
 
 var tooltip;
 //interpolate between the min and max
 // const colorsYears = ['#ffffff','#ffffe0', '#c5eddf', '#a5d5d8', '#8abccf', '#73a2c6', '#5d8abd', '#4771b2', '#2e59a8', '#00429d'];
-const colorsYears = ['#ffffe0', '#caefdf', '#abdad9', '#93c4d2', '#7daeca', '#6997c2', '#5681b9', '#426cb0', '#2b57a7', '#00429d']
+const colorsYears = ['#ffffe0', '#caefdf', '#abdad9', '#93c4d2', '#7daeca', '#6997c2', '#5681b9', '#426cb0', '#2b57a7', '#00429d'];
+
+$(window).on('load', function(){
+	
+	
+	tippy.setDefaults({
+        animation: 'fade',
+        arrow: true,
+        content: 'test',
+        theme: 'light',
+        dynamicTitle: true,
+        interactive: false,
+        hideOnClick: false
+    });
+	initialize();
+});
+/*
+$.getScript("myplugin.js", function() {
+     $.holdReady(false);
+});
+*/
 function initialize(){
 	
 	
 
 	fetchData();
+	//$.holdReady(true);
+	/*let script = $('#tippylib').addEventListener('load', function(){
+		;
+	})*/
 }
 
 function fetchData(){
@@ -81,7 +105,6 @@ function fetchData(){
 				seasons[row.season].total +=1;
 				seasons[row.season].indexOfPrograms.push(i);
 			}
-
 
 			w = row.works;
 			//works
@@ -183,24 +206,36 @@ function fetchData(){
 
 }
 
+function tooltip(selector, text){
+	tippy(selector, {
+		content: text
+		/*trigger: 'mouseenter',
+		onShow(tip){
+			tip.set({trigger:'click', content: bars d.value.total})
+		},
+		onHide(tip) {
+		    tip.set({ trigger: 'mouseenter' })
+		}*/
+	})
+}
 /////////////////////GRAPHS
 //this graph visualizes in groupings of decades on the number of 
 function graphYears(){
 
 	//arrays for now
 	programs = Object.entries(tempProgs).map(([key, value]) => ({key,value}));
+
+	///concerts;
 	years = Object.entries(seasons).map(([key, value]) => ({key,value}));
 	
 	svg = d3.select("body").append("div").append("div")
-   .attr("class", "svg-container")
-
-
+  	.attr("class", "svg-container")
 	.append("svg")
 		//.attr("width", window.innerWidth * .9)
 		//.attr("height", window.innerHeight)
 		.attr("class", "svg")
 		.attr("display", "block")
-		.attr("viewBox", "0 0 " + width + " " + height )
+		.attr("viewBox", "0 0 " + width*3/4 + " " + height )
         .attr("preserveAspectRatio", "xMinYMin meet")
         .attr("class", "svg-content-responsive")
 		//.attr("overflow", "auto");
@@ -209,12 +244,12 @@ function graphYears(){
 
 	SVGS["yearChart"] = svg;
 
-	tooltip = d3.select("body").append("div")   
+	/*tooltip = d3.select("body").append("div")   
     .attr("class", "tooltip top")               
-    .style("opacity", 0);
+    .style("opacity", 0);*/
 
 	//redefine this to be the size of the svg instead
-	var gridSize = Math.floor(width/10)/3,
+	var gridSize = Math.floor(window.innerHeight/10)/3,
 		buckets = 10,
 		legendBoxWidth = gridSize*2,
 		minScale = returnMinValueObject(years, "total")["total"],
@@ -242,7 +277,6 @@ function graphYears(){
 	sumToQuantileRanges(years,colorScaleYears.quantiles());
 
 	
-
 	var g = svg.append("g")
 			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 			.attr("class", "charts")
@@ -256,9 +290,8 @@ function graphYears(){
 		.enter().append("text")
 		.text(function(d) {return "_" + d;})
 		.attr("class", "yearLabel axis")
-		.attr("x", function(d, i){
-			return (i+1)*gridSize + gridSize/2;
-		})
+		.attr("x", (d, i) =>
+			 (margin.left + (i+1)*gridSize + gridSize*3/4))
 		.attr("y", 10)
 		.style("text-anchor", "middle")
 		.attr("transform", "translate(" + gridSize/2 + ", -6 )");
@@ -270,12 +303,11 @@ function graphYears(){
 		.attr("class", "yearLabel axis")
 		.attr("x", 0)
 		.attr("y", function(d, i){
-			return ((i+1)*gridSize) - gridSize/2;
+			return ((i+1)*gridSize);
 		})
 		.style("text-anchor", "start")
 		.attr("transform", "translate(0," + gridSize/2 +" )");
 	
-
 	var bars = g.append("g")
 		.attr("class", "bars")
 		.attr("transform", "translate(20," + 20 + ")")
@@ -285,7 +317,7 @@ function graphYears(){
       	.append('rect')
       	.attr("class", "year border")
         .attr("x", function(d, i){
-        	return gridSize + (+d.key % buckets) * gridSize})
+        	return margin.left + gridSize + (+d.key % buckets) * gridSize})
         .attr("y", function(d, i){
         	return((Math.floor(+d.key/10) - min) * gridSize)})
         .attr("rx", 4)
@@ -293,30 +325,43 @@ function graphYears(){
         .attr("width", gridSize)
         .attr("height", gridSize)
         .style("fill", function(d,i){
-        	/*console.log(colorScaleYears(d.value.total));*/
+        	return '#fffeee'//colorScaleYears(d.value.total)
+        })
+        .attr('data-tippy-content', function(d){return "Total: " + d.value.total})
+
+        bars.transition().duration(1500).style("fill", function(d,i){
         	return colorScaleYears(d.value.total)
         })
-        .on("mouseover", function(d) {
-		    /*tippy(tooltip.html("Total: " + d.value.total)  
+
+
+        
+        
+
+       /* .on("mouseover", function(d) {
+		    tippy(tooltip.html("Total: " + d.value.total)  
 		        .style("left", (d3.event.pageX) + "px")     
-		        .style("top", (d3.event.pageY - 28) + "px"))*/
-		    tooltip.transition()        
+		        .style("top", (d3.event.pageY - 28) + "px"))
+		        let text = "Total: " + d.value.total;
+		    tippy('svg .year', text)})*/
+		    /*tooltip.transition()        
 		        .duration(200)      
 		        .style("opacity", .9);      
 		    tooltip.html("Total: " + d.value.total)  
 		        .style("left", (d3.event.pageX) + "px")     
 		        .style("top", (d3.event.pageY - 28) + "px");    
-		    })
+		    })*/
 			/*.on("click", function(d) {
 				$("#slide").slideToggle();
 				slide.style('display', 'visible');
 				slide.html("Countries: " + "<br/>"  + parseCountries(d));
 		    })*/
-		.on("mouseout", function(d) {
+		/*.on("mouseout", function(d) {
 		    tooltip.transition()        
 		        .duration(500)      
 		        .style("opacity", 0);   
-		});
+		});*/
+
+		tippy(bars.nodes());
 		
 		var legend = g.append("g")
 		.attr("class", "legend")
@@ -328,15 +373,20 @@ function graphYears(){
       	console.log(colorScaleYears.quantiles())
 
       	legend.append("rect")
-      	.attr("class", "box")
+      	.attr("class", "legend box border")
       	.attr("width", gridSize)//*10/(colorsYears.length-1))
       	.attr("height", gridSize)
-      	.attr("x", (d,i)=> (gridSize+(i*gridSize*10/(colorsYears.length-1))))
+      	.attr("x", (d,i)=> (margin.left + gridSize+(i*gridSize*10/(colorsYears.length-1))))
       	.attr("y", d3.select(".bars").node().getBBox().height)
       	.style("fill", function(d,i){
       		return i >= 9 ? "00429d" : colorsYears[i];
       	})	//do this because quantiles return n-1, so we have an extra as placeholder
-      	.on("mouseover", function(d,i) {
+      	.attr('data-tippy-content', (d, i) => "Total number of years: " + totalYearsInQuantiles[i])	//upper bound  with " + "≤" + Math.ceil(colorScaleYears.quantiles()[i]-1))
+
+      	tippy('svg .legend .box')
+       // tippy(legend.nodes());
+
+      	/*.on("mouseover", function(d,i) {
 		    tooltip.transition()        
 		        .duration(200)      
 		        .style("opacity", .9);      
@@ -348,24 +398,28 @@ function graphYears(){
 		    tooltip.transition()        
 		        .duration(500)      
 		        .style("opacity", 0);   
-		});
+		});*/
 
       	legend.append("text").attr("class", "legend")
       	      	.text((d,i)=>  "≤" + Math.ceil(colorScaleYears.quantiles()[i]-1))
       			.attr("x", function(d, i){
-      				return gridSize*1.1+(i*gridSize*10/(colorsYears.length-1))})
-      			.attr("y", d3.select(".legend").node().getBBox().height + 20)
+      				return margin.left + gridSize*1.1+(i*gridSize*10/(colorsYears.length-1))})
+      			.attr("y", d3.select(".legend").node().getBBox().height + 10)
       			.style("text-anchor", "center")
 
-      		legend.append("text").attr("class", "h6 legend")
+      		legend.append("text").attr("class", "legend")
       	      	.text("Total concerts played in year")
       			.attr("x", function(d, i){
-      				return gridSize*1.1+(2*gridSize*10/(colorsYears.length-1))})
+      				return gridSize*1.5+(gridSize*10/(colorsYears.length-1))})
       			.attr("y", d3.select(".legend").node().getBBox().height + 20)
       			.style("text-anchor", "center")
 
-      	svg.attr("viewBox", "0 0 " + width + " " + (d3.select(".legend").node().getBBox().y + +d3.select(".legend").node().getBBox().height + 100))
-      	.attr("preserveAspectRatio", "xMinYMin meet");
+      	g.attr("transform", "translate(" + svg.node().getBBox().width/2 + "," + margin.top + ")")
+			
+      	svg.attr("viewBox", "0 0 " + width*3/4  + " " + (g.node().getBBox().y + +g.node().getBBox().height + 30))
+      	.attr("preserveAspectRatio", "xMinYMin meet")
+      	//.attr("width", d3.select(".charts").node().getBBox().width)
+
       	//console.log(colorScaleYears.quantile())
 		/*g.append("rect")
 		.attr("class", "fake border")
@@ -426,6 +480,9 @@ function graphYears(){
 function redraw(){
 	$("body").attr("width", window.innerWidth);
 	$("body").attr("height", window.innerHeight);
+
+	width = window.innerWidth - margin.left - margin.right;
+	height = window.innerHeight - margin.top - margin.bottom;
 
 }
 window.addEventListener("resize", redraw);

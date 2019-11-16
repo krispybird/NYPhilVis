@@ -31,24 +31,34 @@ body {
 
 
 
-/*svg {
+svg {
 	display: block;
 	margin: auto;
 	text-align: center;
-}*/
+}
+
 .svg-container {
-    display: inline-block;
+    /*display: inline-block;*/
     position: relative;
-    width: 100%;
+    width: 80%;
+    height: 100%;
     padding-bottom: 100%; /* aspect ratio */
     vertical-align: top;
-    overflow: hidden;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 .svg-content-responsive {
     display: inline-block;
     position: absolute;
+    margin: auto;
     top: 10px;
+    width: 100%;
     left: 0;
+    right: 0;
+    /*left: 0;*/
 }
 
 .essay{
@@ -100,10 +110,21 @@ h2{
 	text-transform: lowercase;
 }
 
+h3{
+	font-family: 'Metamorphous';
+}
+
 h6{
-	font-size: 1.5em;
+	font-size: 1em;
 	text-anchor: center;
 	text-transform: lowercase;
+	text-align: center;
+}
+
+.legend{
+	font-size: .9em;
+	text-anchor: center;
+	text-align: center;
 }
 
 .control_panel{
@@ -114,13 +135,7 @@ h6{
 }
 
 
-h3{
-	/*visibility:hidden; 
-	display:none;
-	*/
-	font-family: 'Metamorphous';
-	
-}
+
 
 g{
 	display: inherit;
@@ -206,28 +221,6 @@ g{
   color: #000;
 }
 
-.link {
-  fill: none;
-  stroke: #000;
-  stroke-opacity: .2;
-}
-
-.link:hover {
-  stroke-opacity: .5;
-}
-
-.trunk{
-  fill: #000;
-  /*stroke: #000;*/
-  fill-opacity: .2;
-  stroke-opacity: .2;
-  opacity: .8;
-}
-
-.trunk:hover {
- stroke-opacity: .5;
- opacity: 1;
-}
 
 /*div.tooltip {   
   position: absolute;           
@@ -263,12 +256,14 @@ g{
 	background: gray;   
 }
 
-rect.bordered{
-	stroke: "#f7f7f5";
-	stroke-width: 5px;
+rect.border{
+	/*border: #E6E6E6;
+	border-width: 2px;*/
+	stroke: #cececec7;
+    stroke-width:2px;
 }
 
 .axis{
 	font: 1em sans-serif;
-	text-align: justified;
+	text-align: center;
 }
