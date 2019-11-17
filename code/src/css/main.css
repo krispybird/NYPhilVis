@@ -244,6 +244,8 @@ div{
     font-size: 1em;
 }
 #slider{
+	position: absolute;
+	
 	height: 100%;
 	display: none;
     background: transparent;

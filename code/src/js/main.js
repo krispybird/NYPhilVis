@@ -85,6 +85,7 @@ function fetchData(){
 		
 
 		//var s = Object.entries(programs).map(([key, value]) => ({key,value}));
+		//sees the number of
 		for (i in data[0].programs){
 			row = data[0].programs[i];
 			progID = row.programID;
@@ -117,7 +118,12 @@ function fetchData(){
 			}
 
 			w = row.works;
+			//multiple conductors, including guest conductors, can count as having conducted the concert
+			//we are primarily interested in seeing how many concerts have been conducted by this person, so the first time that a work is encountered, if the conductor has not been added, then add them
 			//works
+			//need to count by the number of concerts played
+			//match the concert ID to the 
+			var flag = false;
 			for (j in w){
 				work = w[j];
 
@@ -165,11 +171,21 @@ function fetchData(){
 						for (var x = 0; x < cond.length; x++){
 
 							if (conductorMetadata[cond[x]] == undefined){
-									conductorMetadata[cond[x]] = {"totalConcerts": 1, "indexOfWorks": [works.length-1]};
+									conductorMetadata[cond[x]] = {"totalConcerts": 1, "indexOfWorks": [works.length-1], "totalWorks": 1};
 							}
 							else{
-								conductorMetadata[cond[x]].totalPerformance += 1;//worksMetadata[work.ID].total+1;
+								
 								conductorMetadata[cond[x]].indexOfWorks.push(works.length-1);
+								conductorMetadata[cond[x]].totalWorks += 1;
+
+								//has not been encountered in this program round
+								//add the number of concerts to their total count 
+								//note that totalConcerts will increase if that conductor has appeared in that concert, even if they didn't conduct all the works
+								if (!flag){
+									conductorMetadata[cond[x]].totalConcerts += row.concerts.length;//worksMetadata[work.ID].total+1;
+									flag = true;	//until the next program we encounter
+								}
+								
 								//console.log(j + " " + works.length-1);
 							}
 						}
@@ -393,9 +409,9 @@ function graphYears(){
         })
 
         bars.on("click", function(d) {
-			$("#slideConcertDates").slideToggle();
-			slide.style('display', 'visible');
-			slide.html("<br/> Countries: " + "<br/>"  + parseCountries(d));
+			$("#slider").slideToggle();
+			$("#slider").style('display', 'visible');
+			$("#slider").html("<br/> About: " + "<br/>"  + parseYear(d.key));
 		})
 
 
@@ -490,7 +506,7 @@ function graphYears(){
 	.style("font-size", "1.25em")
 	.style("text-anchor", "left")
 
-  	conductors_panel
+  	let buttons = conductors_panel
   		.selectAll(".control").attr("class", "conductors")
   		.data(principalNames).enter()
 
@@ -509,14 +525,16 @@ function graphYears(){
   			//highlight all years that d is active in
   			let s = principalConductors[d].yearStart;
   			let e = principalConductors[d].yearEnd;
-  			console.log(s + " " + e)
-
+  			
   			d3.selectAll(".year").classed("highlight", false);
   			for (var j = s; j <= e; j++){
   				d3.select("#year-" + j).classed("highlight", true);
   			}
 
   		})
+  		.attr('data-tippy-content', function(d){return "<br/>Total concerts conducted: " + conductorMetadata[d].totalConcerts +"<br/>" + "Total works conducted: " + conductorMetadata[d].totalWorks})
+
+  		tippy(buttons.nodes());
 
   		conductors_panel.attr("width", d3.select("g#chart-concertyears").node().getBBox().width + 30)
       	.attr("height", d3.select("g.conductors").node().getBBox().height + 30)
