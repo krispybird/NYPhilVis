@@ -37,8 +37,14 @@ svg {
 	text-align: center;
 }
 
+.pressable:hover text{
+	color: #FFDF00;
+	pointer-events: visibleFill;
+	background-color: #FFFF00;
+}
+
 .svg-container {
-    /*display: inline-block;*/
+    display: inline-block;
     position: relative;
     width: 80%;
     height: 100%;
@@ -217,7 +223,9 @@ p{
 	text-align: justify;
 }
 
-
+div{
+	overflow: hidden;
+}
 /*div.tooltip {   
   position: absolute;           
   text-align: center;           
@@ -257,6 +265,15 @@ rect.border{
 	border-width: 2px;*/
 	stroke: #cececec7;
     stroke-width:2px;
+    
+}
+
+rect.highlight{
+	/*border: #E6E6E6;
+	border-width: 2px;*/
+	stroke: #FFDF00;
+    stroke-width:3px;
+   
 }
 
 .axis{

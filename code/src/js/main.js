@@ -1,8 +1,7 @@
 
-
 var canvas;
 var context;
-var svg;
+//var svg;
 
 //var programArray;
 
@@ -13,6 +12,7 @@ var tempConcerts = {};
 
 //var concerts = {};
 var works = [];	//use array instead of keys because works can be duplicated with different fields 
+var principalConductors = [];
 
 //var soloists = [];	//uses array but not used atm
 
@@ -27,6 +27,7 @@ var SVGS = {};	//keep track of all charts
 
 var filePath;
 filePath = "../data/complete.json";
+conductorPath = "../data/conductors.json"
 //filePath = "data/1842-43_TO_1910-11.json";
 //filePath = "data/test.json";
 
@@ -71,8 +72,10 @@ function initialize(){
 
 function fetchData(){
 	
-
-	d3.json(filePath).then(function(data){
+	Promise.all([
+		d3.json(filePath),
+		d3.json(conductorPath)
+		]).then(function(data){
 	/*d3.json(filePath, function(error, f){
 		if (error) throw error;*/
 	
@@ -82,8 +85,8 @@ function fetchData(){
 		
 
 		//var s = Object.entries(programs).map(([key, value]) => ({key,value}));
-		for (i in data.programs){
-			row = data.programs[i];
+		for (i in data[0].programs){
+			row = data[0].programs[i];
 			progID = row.programID;
 			
 			delete row.id;
@@ -154,12 +157,15 @@ function fetchData(){
 
 					//CONDUCTOR
 					if (work.conductorName != undefined){
-						cond = work.conductorName.split(";");
+						cond = work.conductorName.split("; ");
+						if (cond.length > 1){
+							console.log(cond);
+						}//warning
 
 						for (var x = 0; x < cond.length; x++){
 
 							if (conductorMetadata[cond[x]] == undefined){
-									conductorMetadata[cond[x]] = {"totalPerformance": 1, "indexOfWorks": [works.length-1]};
+									conductorMetadata[cond[x]] = {"totalConcerts": 1, "indexOfWorks": [works.length-1]};
 							}
 							else{
 								conductorMetadata[cond[x]].totalPerformance += 1;//worksMetadata[work.ID].total+1;
@@ -207,8 +213,46 @@ function fetchData(){
 			}
 		
 		}
+
+		//arrays for now
+		programs = Object.entries(tempProgs).map(([key, value]) => ({key,value}));
+
+		///concerts;
+		years = Object.entries(seasons).map(([key, value]) => ({key,value}));
+
+
+		//loading in arrays for conductors
+		
+		let foundingYear = years[0].key;
+		for (i in data[1]){
+			//within those years, get the number of works conducted played by each person
+			row = data[1][i];
+			let cond = data[1][i].conductor;
+			delete row.conductor
+
+			//below is not necessary
+			
+			/*row.totalConducted = 0;
+			
+			
+			//total years, inclusive till end year
+			//very unoptimized but whatever
+			for (j in row.yearEnd - row.yearStart + 1){
+				let progs = years[j + (row.yearStart - foundingYear)];
+				for (k in progs){
+					progs.indexOfPrograms;
+
+				}
+			}*/
+
+			principalConductors[cond] = row;
+
+		}
+
+
 		graphYears();
-	});
+		
+	})/*.then((d) => graphTopWorks());*/
 
 
 }
@@ -228,35 +272,34 @@ function tooltip(selector, text){
 /////////////////////GRAPHS
 //this graph visualizes in groupings of decades on the number of 
 function graphYears(){
-
-	//arrays for now
-	programs = Object.entries(tempProgs).map(([key, value]) => ({key,value}));
-
-	///concerts;
-	years = Object.entries(seasons).map(([key, value]) => ({key,value}));
-
-	svg = d3.select("body").append("div").append("div")
+	
+	
+	
+	let id = "div-concertyears"
+	let svg = d3.select("body").append("div").append("div")
   	.attr("class", "svg-container")
+  	.attr("id", id)
 	.append("svg")
 		//.attr("width", window.innerWidth * .9)
 		//.attr("height", window.innerHeight)
 		.attr("class", "svg")
 		.attr("display", "block")
-		.attr("viewBox", "0 0 " + width*3/4 + " " + height )
+		//.attr("viewBox", "0 0 " + width*3/4 + " " + height )
         .attr("preserveAspectRatio", "xMinYMin meet")
         .attr("class", "svg-content-responsive")
 		//.attr("overflow", "auto");
 
 
 
-	SVGS["yearChart"] = svg;
+	
 
 	/*tooltip = d3.select("body").append("div")   
     .attr("class", "tooltip top")               
     .style("opacity", 0);*/
 
 	//redefine this to be the size of the svg instead
-	var gridSize = Math.floor(window.innerHeight/10)/3,
+	let border = 2;
+	var gridSize = border + Math.floor(window.innerHeight/10)/3,
 		buckets = 10,
 		legendBoxWidth = gridSize*2,
 		minScale = returnMinValueObject(years, "total")["total"],
@@ -288,12 +331,14 @@ function graphYears(){
 	var g = svg.append("g")
 			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 			.attr("class", "charts")
+			.attr("id", "chart-concertyears")
 			/*.attr("width")*/
 
-	var axisLabels = g.attr("class", "axis").selectAll(".legend").append("text")
+	var axisLabels = g.selectAll(".legend").append("text")
 		.text("Year")
 		.attr("x", 0)
 		.attr("y", 10)
+		.attr("class", "axis")
 		.style("text-anchor", "middle")
 		.attr("transform", "translate(" + g.node().getBBox().width/2 + ", -15 )");
 	//maps out years
@@ -329,50 +374,31 @@ function graphYears(){
       	.enter()
       	.append('rect')
       	.attr("class", "year border")
+      	.attr("id", (d)=>"year-" + d.key)
         .attr("x", function(d, i){
         	return margin.left + gridSize + (+d.key % buckets) * gridSize})
         .attr("y", function(d, i){
         	return((Math.floor(+d.key/10) - min) * gridSize)})
         .attr("rx", 4)
         .attr("ry", 4)
-        .attr("width", gridSize)
-        .attr("height", gridSize)
+        .attr("width", gridSize-border)
+        .attr("height", gridSize-border)
         .style("fill", function(d,i){
         	return '#fffeee'//colorScaleYears(d.value.total)
         })
-        .attr('data-tippy-content', function(d){return "Total concerts performed: " + d.value.totalConcerts})
+        .attr('data-tippy-content', function(d){return "<br/>Total concerts performed: " + d.value.totalConcerts+"<br/>"})
 
         bars.transition().duration(1500).style("fill", function(d,i){
         	return colorScaleYears(d.value.totalConcerts)
         })
 
+        bars.on("click", function(d) {
+			$("#slideConcertDates").slideToggle();
+			slide.style('display', 'visible');
+			slide.html("<br/> Countries: " + "<br/>"  + parseCountries(d));
+		})
 
-        
-        
 
-       /* .on("mouseover", function(d) {
-		    tippy(tooltip.html("Total: " + d.value.total)  
-		        .style("left", (d3.event.pageX) + "px")     
-		        .style("top", (d3.event.pageY - 28) + "px"))
-		        let text = "Total: " + d.value.total;
-		    tippy('svg .year', text)})*/
-		    /*tooltip.transition()        
-		        .duration(200)      
-		        .style("opacity", .9);      
-		    tooltip.html("Total: " + d.value.total)  
-		        .style("left", (d3.event.pageX) + "px")     
-		        .style("top", (d3.event.pageY - 28) + "px");    
-		    })*/
-			/*.on("click", function(d) {
-				$("#slide").slideToggle();
-				slide.style('display', 'visible');
-				slide.html("Countries: " + "<br/>"  + parseCountries(d));
-		    })*/
-		/*.on("mouseout", function(d) {
-		    tooltip.transition()        
-		        .duration(500)      
-		        .style("opacity", 0);   
-		});*/
 
 		tippy(bars.nodes());
 		
@@ -387,8 +413,8 @@ function graphYears(){
 
       	legend.append("rect")
       	.attr("class", "legend box border")
-      	.attr("width", gridSize)//*10/(colorsYears.length-1))
-      	.attr("height", gridSize)
+      	.attr("width", gridSize-border)//*10/(colorsYears.length-1))
+      	.attr("height", gridSize-border)
       	.attr("x", (d,i)=> (margin.left + gridSize+(i*gridSize*10/(colorsYears.length-1))))
       	.attr("y", d3.select(".bars").node().getBBox().height)
       	.style("fill", function(d,i){
@@ -399,19 +425,9 @@ function graphYears(){
       	tippy('svg .legend .box')
        // tippy(legend.nodes());
 
-      	/*.on("mouseover", function(d,i) {
-		    tooltip.transition()        
-		        .duration(200)      
-		        .style("opacity", .9);      
-		    tooltip.html("Total number of years: " + totalYearsInQuantiles[i])	//upper bound  with " + "≤" + Math.ceil(colorScaleYears.quantiles()[i]-1) + " concerts: " +
-		        .style("left", (d3.event.pageX) + "px")     
-		        .style("top", (d3.event.pageY - 28) + "px")
-		})
-		.on("mouseout", function(d) {
-		    tooltip.transition()        
-		        .duration(500)      
-		        .style("opacity", 0);   
-		});*/
+
+
+
 
       	legend.append("text").attr("class", "legend")
       	      	.text((d,i)=>  "≤" + Math.ceil(colorScaleYears.quantiles()[i]-1))
@@ -438,70 +454,86 @@ function graphYears(){
       			.style("text-anchor", "middle")
 
 
-      	let w =  svg.node().getBBox().width/2 + g.node().getBBox().width/2;
+      	//let w =  svg.node().getBBox().width/2;// + g.node().getBBox().width/2;
 
-      	g.attr("transform", "translate(" + w + "," + margin.top + ")")
-		console.log(w);
-      	svg.attr("viewBox", "0 0 " + width*3/4  + " " + (g.node().getBBox().y + +g.node().getBBox().height + 30))
-      	.attr("preserveAspectRatio", "xMinYMin meet")
-      	//.attr("width", d3.select(".charts").node().getBBox().width)
-
-      	//console.log(colorScaleYears.quantile())
-		/*g.append("rect")
-		.attr("class", "fake border")
-        .attr("x", function(){
-        	return gridSize })
-        .attr("y", function(d, i){
-        	return( gridSize)})
-        .attr("rx", 4)
-        .attr("ry", 4)
-        .attr("width", gridSize)
-        .attr("height", gridSize)
-        .style("fill", function(d,i){
-        	return 'gray';});*/
-
+      	//g.attr("transform", "translate(" + w + "," + margin.top + ")")
 		
-
 		
-        //.style("fill", colorsYears[0])
-        /*.merge(bars)
-        .transition().duration(1000)
-        .style("fill", function(d,i){
-        	return colorScale(d[i].value.total)
-        })*/
+			//svg.attr("viewBox", "0 0 " + width*3/4  + " " + (g.node().getBBox().y + +g.node().getBBox().height + 30))
+      	svg.attr("preserveAspectRatio", "xMinYMin meet")
+      	.attr("width", d3.select("g#chart-concertyears").node().getBBox().width + 30)
+      	.attr("height", d3.select("g.charts").node().getBBox().height + 30)
 
-		 
-        
+/////////////////////////////////////////////////////////////////////////// IS FOR THE BUTTONS  ///////////////////////////////////////////////////////////////////////
 
-        /*bar.append("text")
-			.attr("dy", ".22em")//.18
-			.attr("x", function(d) { return d.children || d._children ? -13 : 13;})
-			.attr("text-anchor", function(d) {
-			  return d.children || d._children ? "end" : "start";
-			})
-			.on("mouseover", function(d) {
-			    div.transition()        
-			        .duration(200)      
-			        .style("opacity", .9);      
-			    div.html("Orchestra: " + d.orchestra)  
-			        .style("left", (d3.event.pageX) + "px")     
-			        .style("top", (d3.event.pageY - 28) + "px");    
-			    })
-				.on("click", function(d) {
-					$("#slide").slideToggle();
-					slide.style('display', 'visible');
-					slide.html("Countries: " + "<br/>"  + parseCountries(d));
-			    })
-			.on("mouseout", function(d) {
-			    div.transition()        
-			        .duration(500)      
-			        .style("opacity", 0);   
-			})
-        	.text( function(d){return d.season})*/
+    let principalNames = Object.keys(principalConductors);
+    //Object.values(principalConductors).filter(v=> principalNames.push(v.conductor));
+
+    
+    let svg_x = 30;
+    let svg_y =  d3.select('g.bars').node().getBBox().y + 50;
+    console.log(d3.select('g.bars').node().getBBox())
 
 
-	
+    var conductors_panel = 
+    		svg.append("g")
+			.attr("transform", "translate(" + svg_x + "," + svg_y + ")")
+			.attr("class", "charts")
+			.attr("id", "chart-principal-conductors")
+	        .attr("preserveAspectRatio", "xMinYMin meet")
+
+	let align = d3.select('g.bars').node().getBBox();
+	conductors_panel.append("text")
+	.text("Principal Conductors")
+	.attr("x", align.width + align.x + 30)
+	.attr("y", align.y -25)
+	.style("font-size", "1.25em")
+	.style("text-anchor", "left")
+
+  	conductors_panel
+  		.selectAll(".control").attr("class", "conductors")
+  		.data(principalNames).enter()
+
+  		//.html((d)=>"<span><text>" + d + "</span>")
+  		.append("text")
+  		.text((d)=>d)
+  		.attr("type", "button")
+  		.attr("class", "conductors pressable")
+  		.attr("id", (d)=>String(d))
+  		.style("fill", "gray")
+  		.attr("x", align.width + align.x + 30)
+  		.attr("y", (d,i) => align.y + i*(align.height/principalNames.length))
+  		.attr("text-align", "left")
+  		.attr("text-anchor", "left")
+  		.on("click", (d) =>{
+  			//highlight all years that d is active in
+  			let s = principalConductors[d].yearStart;
+  			let e = principalConductors[d].yearEnd;
+  			console.log(s + " " + e)
+
+  			d3.selectAll(".year").classed("highlight", false);
+  			for (var j = s; j <= e; j++){
+  				d3.select("#year-" + j).classed("highlight", true);
+  			}
+
+  		})
+
+  		conductors_panel.attr("width", d3.select("g#chart-concertyears").node().getBBox().width + 30)
+      	.attr("height", d3.select("g.conductors").node().getBBox().height + 30)
+  		
+  		/*.attr("x", 15)
+  		.attr("y", (d, i) => i*20)*/
+
+    SVGS[id] = svg;
+/*    d3.select("body").on("click", ()=>{
+		var outside = d3.selectAll(".year").filter(d3.event.target).empty();//#tooltip, #tooltip *").filter(equalToEventTarget).empty();
+		    if (outside) {
+		        d3.selectAll(".year").classed("highlight", false);
+		    }
+	})*/
 }
+
+
 
 function redraw(){
 	$("body").attr("width", window.innerWidth);

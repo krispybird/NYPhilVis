@@ -1,0 +1,37 @@
+d3.selectAll('.year')._groups[0] === document.querySelectorAll('.year') ===
+(nodelist)
+
+$('.year') (init)
+
+tippy('svg .year')
+
+data-tippy-content
+
+
+
+        
+        
+
+       /* .on("mouseover", function(d) {
+		    tippy(tooltip.html("Total: " + d.value.total)  
+		        .style("left", (d3.event.pageX) + "px")     
+		        .style("top", (d3.event.pageY - 28) + "px"))
+		        let text = "Total: " + d.value.total;
+		    tippy('svg .year', text)})*/
+		    /*tooltip.transition()        
+		        .duration(200)      
+		        .style("opacity", .9);      
+		    tooltip.html("Total: " + d.value.total)  
+		        .style("left", (d3.event.pageX) + "px")     
+		        .style("top", (d3.event.pageY - 28) + "px");    
+		    })*/
+			/*.on("click", function(d) {
+				$("#slide").slideToggle();
+				slide.style('display', 'visible');
+				slide.html("Countries: " + "<br/>"  + parseCountries(d));
+		    })*/
+		/*.on("mouseout", function(d) {
+		    tooltip.transition()        
+		        .duration(500)      
+		        .style("opacity", 0);   
+		});*/
