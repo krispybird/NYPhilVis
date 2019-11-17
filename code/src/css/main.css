@@ -37,8 +37,23 @@ svg {
 	text-align: center;
 }
 
-.pressable:hover text{
-	color: #FFDF00;
+.pressable{
+
+}
+.pressable:hover{
+	color: #000000;
+	pointer-events: visibleFill;
+	background-color: #FFFFF0;
+}
+
+.pressable:active{
+	color: #000000;
+	pointer-events: visibleFill;
+	background-color: #FFFF00;
+}
+
+.pressable:focus{
+	color: #000000;
 	pointer-events: visibleFill;
 	background-color: #FFFF00;
 }
@@ -67,6 +82,29 @@ svg {
     /*left: 0;*/
 }
 
+.svg-content-responsive--a {
+    display: inline-block;
+    position: absolute;
+    margin: auto;
+    top: 10px;
+    width: 50%;
+    left: 0;
+    right: initial;
+    /*left: 0;*/
+}
+
+.toolbar--b{
+
+   
+    display: inline-block;
+    margin: auto;
+    width: 50%;
+    position: absolute;
+    left: 50%;
+    right: 0;
+
+}
+
 .essay{
 	padding: 0 15%;
 	font-size: 1.5em;
@@ -74,12 +112,13 @@ svg {
 
 button {
 	border: none;
-	background: rgba(150, 150, 150, 0);
+	background: rgba(241, 241, 241, 0.67);
 	color: gray;
 	cursor: pointer;
 
-	float: right;
+	float: left;
 	padding: 5px;
+	margin:2px;
 	
 	text-transform: lowercase;
 }
@@ -245,21 +284,20 @@ div{
 }
 #slider{
 	position: absolute;
-	
+
 	height: 100%;
 	display: none;
-    background: transparent;
-	overflow: auto;
+    overflow: auto;
 	opacity: 1;
-    color: #FFF;
+    color: #000000;
     padding: 10px;
 	position: absolute;
-	left: 0;
-	width: 15%;
+	right: 0;
+	width: 25%;
 	
 	text-align: justified;
-	font: 12px sans-serif;        
-	background: gray;   
+	/*font: 12px sans-serif;*/        
+	background: #f0f0f0;   
 }
 
 rect.border{
