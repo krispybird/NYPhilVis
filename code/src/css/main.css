@@ -61,7 +61,7 @@ svg {
 .svg-container {
     display: inline-block;
     position: relative;
-    width: 80%;
+    width: 90%;
     height: 100%;
     padding-bottom: 100%; /* aspect ratio */
     vertical-align: top;
@@ -87,8 +87,20 @@ svg {
     position: absolute;
     margin: auto;
     top: 10px;
-    width: 50%;
+    /*width: 45%;*/
     left: 0;
+    right: initial;
+    /*left: 0;*/
+}
+
+.svg-content-responsive--b {
+    display: inline-block;
+    position: absolute;
+    margin: auto;
+    top: 10px;
+    /*width: 30%;*/
+    /*left: 50%;*/
+    right: 0;
     right: initial;
     /*left: 0;*/
 }
@@ -104,6 +116,13 @@ svg {
     right: 0;
 
 }
+
+.bars {
+    fill: #8CD3DD;
+  }
+.bars:hover {
+    fill: #F56C4E;
+  }
 
 .essay{
 	padding: 0 15%;
@@ -155,6 +174,15 @@ h2{
 	text-transform: lowercase;
 }
 
+
+
+h5{
+	font-size: 1em;
+	text-anchor: center;
+	text-transform: uppercase;
+	text-align: center;
+	margin: 0 auto;
+}
 
 h6{
 	font-size: 1em;
@@ -285,7 +313,7 @@ div{
 #slider{
 	position: absolute;
 
-	height: 100%;
+	/*height: 100%;*/
 	display: none;
     overflow: auto;
 	opacity: 1;
@@ -303,7 +331,8 @@ div{
 rect.border{
 	/*border: #E6E6E6;
 	border-width: 2px;*/
-	stroke: #cececec7;
+	/*stroke: #cececec7;*/
+	stroke:#ffffff;
     stroke-width:2px;
     
 }
@@ -312,6 +341,22 @@ rect.highlight{
 	/*border: #E6E6E6;
 	border-width: 2px;*/
 	stroke: #FFDF00;
+    stroke-width:3px;
+   
+}
+
+rect.highlight--p{
+	/*border: #E6E6E6;
+	border-width: 2px;*/
+	stroke:#ff4d50 !important;
+    stroke-width:3px;
+   
+}
+
+rect.highlight--s{
+	/*border: #E6E6E6;
+	border-width: 2px;*/
+	stroke:	#FFDF00;
     stroke-width:3px;
    
 }

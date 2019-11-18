@@ -40,6 +40,8 @@ var tooltip;
 // const colorsYears = ['#ffffff','#ffffe0', '#c5eddf', '#a5d5d8', '#8abccf', '#73a2c6', '#5d8abd', '#4771b2', '#2e59a8', '#00429d'];
 const colorsYears = ['#ffffe0', '#caefdf', '#abdad9', '#93c4d2', '#7daeca', '#6997c2', '#5681b9', '#426cb0', '#2b57a7', '#00429d'];
 
+//const colorsYears = ['#ffffe0', '#ffffd9','#edf8b1','#c7e9b4','#7fcdbb','#41b6c4','#1d91c0','#225ea8','#253494','#081d58']
+
 $(window).on('load', function(){
 	
 	
@@ -123,7 +125,7 @@ function fetchData(){
 			//works
 			//need to count by the number of concerts played
 			//match the concert ID to the 
-			var flag = false;
+			var condflag = false, compflag = false, workflag = false;
 			for (j in w){
 				work = w[j];
 
@@ -135,12 +137,17 @@ function fetchData(){
 
 					//if first instances of this work id showing up
 					if (worksMetadata[work.ID] == undefined){
-						worksMetadata[work.ID] = {"totalPerformance": 1, "indexOfWorks": [works.length-1]};
+						worksMetadata[work.ID] = {"totalPerformance": 1, "indexOfWorks": [works.length-1], "yearsPerformed": []};
 					}
 					else{
 						worksMetadata[work.ID].totalPerformance += 1;
 						worksMetadata[work.ID].indexOfWorks.push(works.length-1);
 					}
+
+					//actually check if in there
+					if (!worksMetadata[work.ID].yearsPerformed.includes(row.season)){
+						worksMetadata[work.ID].yearsPerformed.push(row.season);
+					}				
 
 					//should get an array filled with indices to all unique works in that work, grouped by ID
 
@@ -150,15 +157,22 @@ function fetchData(){
 
 						for (var x = 0; x < comp.length; x++){
 							if (composerMetadata[comp[x]] == undefined){
-									composerMetadata[comp[x]] = {"totalPerformance": 1, "indexOfWorks": [works.length-1]};
+									composerMetadata[comp[x]] = {"totalPerformance": 1, "indexOfWorks": [works.length-1], "yearsPerformed": []};
 							}
 							else{
 								composerMetadata[comp[x]].totalPerformance += 1;
 								composerMetadata[comp[x]].indexOfWorks.push(works.length-1);
 								
 							}
+							
+							if (!composerMetadata[comp[x]].yearsPerformed.includes(row.season)){
+								composerMetadata[comp[x]].yearsPerformed.push(row.season);
+							}
 						}
+
+
 					}
+					
 					
 
 					//CONDUCTOR
@@ -171,23 +185,28 @@ function fetchData(){
 						for (var x = 0; x < cond.length; x++){
 
 							if (conductorMetadata[String(cond[x])] == undefined){
-									conductorMetadata[String(cond[x])] = {"totalConcerts": 1, "indexOfWorks": [works.length-1], "totalWorks": 1};
+									conductorMetadata[String(cond[x])] = {"totalConcerts": 1, "indexOfWorks": [works.length-1], "totalWorks": 1, "yearsPerformed": []};
 							}
 							else{
 								
 								conductorMetadata[String(cond[x])].indexOfWorks.push(works.length-1);
 								conductorMetadata[String(cond[x])].totalWorks += 1;
-
-								//has not been encountered in this program round
-								//add the number of concerts to their total count 
-								//note that totalConcerts will increase if that conductor has appeared in that concert, even if they didn't conduct all the works
-								if (!flag){
-									conductorMetadata[String(cond[x])].totalConcerts += row.concerts.length;//worksMetadata[work.ID].total+1;
-									flag = true;	//until the next program we encounter
-								}
-								
-								//console.log(j + " " + works.length-1);
 							}
+
+
+
+							if (!conductorMetadata[cond[x]].yearsPerformed.includes(row.season)){
+								conductorMetadata[cond[x]].yearsPerformed.push(row.season);
+							}
+							//has not been encountered in this program round
+							//add the number of concerts to their total count 
+							//note that totalConcerts will increase if that conductor has appeared in that concert, even if they didn't conduct all the works
+							if (!condflag){
+								conductorMetadata[String(cond[x])].totalConcerts += row.concerts.length;//worksMetadata[work.ID].total+1;
+								condflag = true;	//until the next program we encounter
+							}
+
+
 						}
 					}
 					
@@ -308,7 +327,7 @@ function graphYears(){
 
 	let toolbar = chart.append("div")
 			.attr("class", "toolbar--b")
-			.attr("display", "inline-block")
+			.attr("display", "none")
 
 	//redefine this to be the size of the svg instead
 	let border = 2;
@@ -393,8 +412,9 @@ function graphYears(){
         	return margin.left + gridSize + (+d.key % buckets) * gridSize})
         .attr("y", function(d, i){
         	return((Math.floor(+d.key/10) - min) * gridSize)})
-        .attr("rx", 4)
-        .attr("ry", 4)
+        /*.attr("rx", 4)
+        .attr("ry", 4)*/
+        .attr("border-radius", 4)
         .attr("width", gridSize-border)
         .attr("height", gridSize-border)
         .style("fill", function(d,i){
@@ -410,7 +430,7 @@ function graphYears(){
 			$("#slider").slideToggle();
 			$("#slider").attr('display', 'visible');
 			d3.select('#slider').style('height', d3.select('#svg-concertyears').node().getBoundingClientRect().height);
-			$("#slider").html("<br/> About: " + "<br/>"  + parseSlider(d.key));
+			$("#slider").html("<br/> <h5>About </h5> " + "<br/>"  + parseSlider(d.key));
 		})
 
 
@@ -419,6 +439,7 @@ function graphYears(){
 		
 		var legend = g.append("g")
 		.attr("class", "legend")
+		.attr("id", "legend-year")
 		.attr("transform", "translate(20,50)")// + 0 + ")")
 		.selectAll(".legend")
       	.data(colorScaleYears.quantiles())
@@ -489,51 +510,213 @@ function graphYears(){
     	p_concerts[i] = conductorMetadata[principalNames[i]].totalConcerts;
     }
 
-    console.log(p_concerts);
+    console.log(p_concerts.sort((a,b) => a-b));
 
-    //Object.values(principalConductors).filter(v=> principalNames.push(v.conductor));
-
+    
     
     let svg_x = 30;
     let svg_y =  d3.select('g.bars').node().getBBox().y + 50;
 
+   
 
-    var conductors_panel = toolbar.append("div")
+    var c_svg = chart.append("svg")//.append("div")
 			/*.attr("transform", "translate(" + svg_x + "," + svg_y + ")")*/
-			.attr("class", "charts")
-			.attr("id", "chart-principal-conductors")
-	        .attr("preserveAspectRatio", "xMinYMin meet")
-	        .style("width", "50%")
+		.attr("class", "svg")
+		.attr("display", "inline-block")
+		.attr("preserveAspectRatio", "xMinYMin meet")
+    	.attr("class", "svg-content-responsive--b")
+		.attr("id", "svg-principal-conductors")
+		.attr("height", svg.node().getBBox().height)
+        
 
-	let align = d3.select('g.bars').node().getBBox();
-	conductors_panel.append("text")
-	.text("Principal Conductors")
-	.attr("x", align.width + align.x + 30)
-	.attr("y", align.y -25)
-	.style("font-size", "1.25em")
+	let align = c_svg.node().getBBox();
+
+	c_svg.append("text")
+	.attr("transform", "translate(" + align.x + "," + align.y + ")")
+	.text("Principal Conductors x Concerts Conducted")
+	.attr("x", align.x + 30)
+	.attr("y", align.y + 25)
+	.style("font-size", "1.15em")
 	.style("text-anchor", "left")
 
 	//ratchet way of making some bars
-	let maxWidthOfBars = conductors_panel.node().getBoundingClientRect().width;
+	let maxWidthOfBars = c_svg.node().getBoundingClientRect().width - 30;
+	let maxHeightOfBars = d3.select("g.bars").node().getBoundingClientRect().height ;
 	let divMax = p_concerts.reduce(function(a, b){
+		return a > b ? a : b
+	});
+	let divMin = p_concerts.reduce(function(a, b){
 		return a < b ? a : b
 	});
 	let divRatio = maxWidthOfBars/divMax;
+	console.log(maxWidthOfBars);
+
+	let x = d3.scaleLinear().domain([divMin, divMax]).range([80, maxWidthOfBars]);
+
+	let y = d3.scaleBand().range([40, maxHeightOfBars+30]).domain(Object.values(p).map(v=>v.key)).padding(.05);
 
 
-  	let buttons = conductors_panel
+	let c_g = c_svg
+			.append("g")
+			.attr("transform", "translate(" + margin.left + "," + 0 + ")")
+			.attr("class", "charts")
+			.attr("id", "chart-conductors")
+			//.attr("class", "conductors")
+			//.data(p).enter();
+
+
+    	
+	let c_bars = c_g.append("g")
+		.attr("class", "bars")
+		//.attr("transform", "translate(20, 0)")
+		.selectAll(".conductors")
+		.data(p).enter()
+  		.append("rect")
+  		.attr("class", "bars pressable")
+  		.attr("id", (d)=>d.key)
+  		.attr("height", y.bandwidth())
+  		.attr("width", (d)=>x(d.value.totalConcerts))
+  		.attr("x", (d)=> x(0) + 30)
+  		.attr("y", (d, i)=> y(d.key))
+  		//.style("fill", "#cececec7")
+
+
+  		.on("focus", (d) =>{
+  			//highlight all years that d is active in
+  			let s = principalConductors[d.key].yearStart;
+  			let e = principalConductors[d.key].yearEnd;
+  			
+  			d3.selectAll(".year").classed("highlight highlight--p highlight--s", false);
+
+  			console.log(d.value.yearsPerformed);
+  			console.log(s + "-" + e)
+
+  			for (k in d.value.yearsPerformed){
+  				d3.select("#year-" + d.value.yearsPerformed[k]).classed("highlight--s", true);
+  			}
+
+  			for (var j = s; j <= e; j++){
+  				d3.select("#year-" + j).classed("highlight--p", true);
+  			}
+
+  			//then show years active 
+
+  			/*$("#slider").slideToggle();
+  			$('#slider').attr('height', d3.select('#svg-concertyears').node().getBoundingClientRect().height);
+			$("#slider").attr('display', 'visible');
+			$("#slider").attr('class', 'svg-content-responsive--b');
+			$("#slider").html("<br/> About: " + "<br/>"  + parseSlider(d.key));*/
+
+  		})
+  		.attr('data-tippy-content', (d)=>{
+  			return ("<br/>Total concerts conducted: " + d.value.totalConcerts +"<br/>" + "Total works conducted: " + d.value.totalWorks)})
+
+  		//tippy('svg .legend .box')
+  		tippy(c_bars.nodes());
+
+  		
+    	/*var legend = g.append("g")
+		.attr("class", "legend")
+		.attr("transform", "translate(20,50)")// + 0 + ")")
+		.selectAll(".legend")*/
+
+      
+      	var xAxis = d3.axisBottom(x).tickSize([]).tickPadding(5);
+      	var yAxis = d3.axisLeft(y);
+
+      	c_g.append("g").attr("class", "y axis")
+      		.attr("transform", "translate(100,0)")
+          	.call(d3.axisLeft(y))
+          	.selectAll("text")
+          	//.attr("transform", "translate(-10,10)rotate(-45)")
+      	    .style("text-anchor", "end")
+      	    .style("font-size", ".65em")
+      	    .style("fill", "#69a3b2")
+
+
+      	
+      	var c_legend = c_g.append("g")
+			.attr("class", "legend")
+			.attr("id", "legend-conductor")
+			.attr("transform", "translate(20,50)")
+		//.selectAll(".legend")
+
+      	let leg = c_legend.append("g");
+
+      	leg.append("rect")
+      	.attr("class", "legend box border highlight--p")
+      	.attr("width", gridSize-border)//*10/(colorsYears.length-1))
+      	.attr("height", gridSize-border)
+      	.attr("x", (d)=> x(0))
+      	.attr("y", d3.select("#legend-year").node().getBBox().y + (gridSize)*3/4)
+      	.style("fill", "#ff4d5082")
+
+      	leg.append("text")
+      	.text("Principal")
+      	.attr("class", "legend")
+		.attr("x", c_g.select("g.bars").node().getBBox().width/3)
+		.attr("y",  d3.select("#legend-year").node().getBBox().y + gridSize + 35)
+		.style("text-anchor", "middle")
+      	
+
+			/*legend.append("rect")
+			.attr("class", "legend box border")
+			.attr("width", gridSize-border)//*10/(colorsYears.length-1))
+			.attr("height", gridSize-border)
+			.attr("x", (d,i)=> (margin.left + gridSize+(i*gridSize*10/(colorsYears.length-1))))
+			.attr("y", d3.select(".bars").node().getBBox().height)
+			.style("fill", function(d,i){
+				return i >= 9 ? "00429d" : colorsYears[i];
+			})	//do this because quantiles return n-1, so we have an extra as placeholder
+			
+
+			legend.append("text").attr("class", "legend")
+			      	.text((d,i)=>  "≤" + Math.ceil(colorScaleYears.quantiles()[i]-1))
+					.attr("x", function(d, i){
+						return margin.left + gridSize*1.1+(i*gridSize*10/(colorsYears.length-1))})
+					.attr("y", d3.select(".legend").node().getBBox().height + 10)
+					.style("text-anchor", "middle")*/
+////
+
+      	leg.append("rect")
+      	.attr("class", "legend box border highlight--s")
+      	.attr("width", gridSize-border)//*10/(colorsYears.length-1))
+      	.attr("height", gridSize-border)
+      	.attr("x", (d)=> c_g.select("g.bars").node().getBBox().width*2/3 - gridSize/2)
+      	.attr("y", d3.select("#legend-year").node().getBBox().y + (gridSize)*3/4)
+      	.style("fill", "#ffdf0085")
+
+      	leg.append("text")
+      	.text("Guest/other")
+      	.attr("class", "legend")
+		.attr("x", c_g.select("g.bars").node().getBBox().width*2/3)
+		.attr("y",  d3.select("#legend-year").node().getBBox().y + gridSize + 35)
+		.style("text-anchor", "middle")
+
+		l_size = leg.node().getBBox();
+
+		leg.append("text").attr("class", "legend")
+      	      	.text("Conducted as")
+      			.attr("x", (d, i) => l_size.width/4 + l_size.x) 
+      			.attr("y", l_size.height + size.y + 40)
+      			.style("text-align", "middle")
+		
+		leg.append("text").attr("class", "legend")
+  	     
+
+
+
+  	/*let buttons = conductors_panel
   		.selectAll(".control").append("div").attr("class", "conductors")
   		.data(p).enter()
-
-  		//.html((d)=>"<span><text>" + d + "</span>")
   		.append("button")
   		.text((d)=>d.key)
   		.attr("type", "button")
   		.attr("class", "button pressable")
   		.attr("id", (d)=>d.key)
   		.style("fill", "gray")
-  		/*.attr("x", align.width + align.x + 30)*/
-  		/*.attr("y", (d,i) => align.y + i*(align.height/principalNames.length))*/
+  		.attr("x", align.width + align.x + 30)
+  		.attr("y", (d,i) => align.y + i*(align.height/principalNames.length))
   		.attr("text-align", "left")
   		.attr("text-anchor", "left")
   		.on("click", (d) =>{
@@ -551,15 +734,13 @@ function graphYears(){
 			$("#slider").attr('display', 'visible');
 			$("#slider").html("<br/> About: " + "<br/>"  + parseSlider(d.key));
 
-  			//d3.select(this).classed("selected", !d3.select(this).classed("selected"))
-
   		})
   		.attr('data-tippy-content', (d)=>{
-  			return ("<br/>Total concerts conducted: " + d.value.totalConcerts +"<br/>" + "Total works conducted: " + d.value.totalWorks)})
+  			return ("<br/>Total concerts conducted: " + d.value.totalConcerts +"<br/>" + "Total works conducted: " + d.value.totalWorks)})*/
 
-  		tippy(buttons.nodes());
+  		
 
-  		conductors_panel.attr("width", d3.select("g#chart-concertyears").node().getBoundingClientRect().width + 30)
+  		c_svg.attr("width", d3.select("g#chart-concertyears").node().getBoundingClientRect().width + 30)
       	//.attr("height", d3.select("g.conductors").node().getBBox().height + 30)
   		
   		/*.attr("x", 15)
@@ -577,7 +758,7 @@ function graphYears(){
 
 //
 function parseSlider(data){
-
+	;
 }
 
 
@@ -586,8 +767,11 @@ function redraw(){
 	$("body").attr("width", window.innerWidth);
 	$("body").attr("height", window.innerHeight);
 
-	width = window.innerWidth - margin.left - margin.right;
+	/*width = window.innerWidth - margin.left - margin.right;
 	height = window.innerHeight - margin.top - margin.bottom;
+
+	d3.select('.svg-content-responsive--a').attr("height", d3.select("g.charts").node().getBBox().height + 30)
+	d3.select('.svg-content-responsive--b').attr("width", d3.select("g#chart-concertyears").node().getBoundingClientRect().width + 30)*/
 
 }
 window.addEventListener("resize", redraw);
