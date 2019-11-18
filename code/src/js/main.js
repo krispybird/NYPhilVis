@@ -577,7 +577,8 @@ function graphYears(){
   		.attr("height", y.bandwidth())
   		.attr("width", (d)=>x(0))//d.value.totalConcerts))
   		.attr("x", (d)=> x(0) + 30)
-  		.attr("y", (d, i)=> y(0))
+  		.attr("y", 40)
+  		.attr("y", (d, i)=> y(d.key))
   		//.style("fill", "#cececec7")
 
 
@@ -601,11 +602,6 @@ function graphYears(){
 
   			//then show years active 
 
-  			/*$("#slider").slideToggle();
-  			$('#slider').attr('height', d3.select('#svg-concertyears').node().getBoundingClientRect().height);
-			$("#slider").attr('display', 'visible');
-			$("#slider").attr('class', 'svg-content-responsive--b');
-			$("#slider").html("<br/> About: " + "<br/>"  + parseSlider(d.key));*/
 
   		})
   		.attr('data-tippy-content', (d)=>{
@@ -616,10 +612,10 @@ function graphYears(){
 
   		c_g.selectAll("rect")
   		  .transition()
-  		  .duration(600)
+  		  .duration(800)
 		  .attr("width", (d)=>x(d.value.totalConcerts))
-		   .attr("y", (d, i)=> y(d.key))
-  		  .delay(function(d,i){console.log(i) ; return(i*100)})
+		   
+  		  .delay()
 
   		
     	/*var legend = g.append("g")
