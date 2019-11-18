@@ -575,9 +575,9 @@ function graphYears(){
   		.attr("class", "bars pressable")
   		.attr("id", (d)=>d.key)
   		.attr("height", y.bandwidth())
-  		.attr("width", (d)=>x(d.value.totalConcerts))
+  		.attr("width", (d)=>x(0))//d.value.totalConcerts))
   		.attr("x", (d)=> x(0) + 30)
-  		.attr("y", (d, i)=> y(d.key))
+  		.attr("y", (d, i)=> y(0))
   		//.style("fill", "#cececec7")
 
 
@@ -613,6 +613,13 @@ function graphYears(){
 
   		//tippy('svg .legend .box')
   		tippy(c_bars.nodes());
+
+  		c_g.selectAll("rect")
+  		  .transition()
+  		  .duration(600)
+		  .attr("width", (d)=>x(d.value.totalConcerts))
+		   .attr("y", (d, i)=> y(d.key))
+  		  .delay(function(d,i){console.log(i) ; return(i*100)})
 
   		
     	/*var legend = g.append("g")
@@ -654,42 +661,23 @@ function graphYears(){
       	leg.append("text")
       	.text("Principal")
       	.attr("class", "legend")
-		.attr("x", c_g.select("g.bars").node().getBBox().width/3)
+		.attr("x", g.select("g.bars").node().getBBox().width/3)
 		.attr("y",  d3.select("#legend-year").node().getBBox().y + gridSize + 35)
 		.style("text-anchor", "middle")
       	
-
-			/*legend.append("rect")
-			.attr("class", "legend box border")
-			.attr("width", gridSize-border)//*10/(colorsYears.length-1))
-			.attr("height", gridSize-border)
-			.attr("x", (d,i)=> (margin.left + gridSize+(i*gridSize*10/(colorsYears.length-1))))
-			.attr("y", d3.select(".bars").node().getBBox().height)
-			.style("fill", function(d,i){
-				return i >= 9 ? "00429d" : colorsYears[i];
-			})	//do this because quantiles return n-1, so we have an extra as placeholder
-			
-
-			legend.append("text").attr("class", "legend")
-			      	.text((d,i)=>  "≤" + Math.ceil(colorScaleYears.quantiles()[i]-1))
-					.attr("x", function(d, i){
-						return margin.left + gridSize*1.1+(i*gridSize*10/(colorsYears.length-1))})
-					.attr("y", d3.select(".legend").node().getBBox().height + 10)
-					.style("text-anchor", "middle")*/
-////
 
       	leg.append("rect")
       	.attr("class", "legend box border highlight--s")
       	.attr("width", gridSize-border)//*10/(colorsYears.length-1))
       	.attr("height", gridSize-border)
-      	.attr("x", (d)=> c_g.select("g.bars").node().getBBox().width*2/3 - gridSize/2)
+      	.attr("x", (d)=> g.select("g.bars").node().getBBox().width*2/3 - gridSize/2)
       	.attr("y", d3.select("#legend-year").node().getBBox().y + (gridSize)*3/4)
       	.style("fill", "#ffdf0085")
 
       	leg.append("text")
       	.text("Guest/other")
       	.attr("class", "legend")
-		.attr("x", c_g.select("g.bars").node().getBBox().width*2/3)
+		.attr("x", g.select("g.bars").node().getBBox().width*2/3)
 		.attr("y",  d3.select("#legend-year").node().getBBox().y + gridSize + 35)
 		.style("text-anchor", "middle")
 
@@ -702,43 +690,6 @@ function graphYears(){
       			.style("text-align", "middle")
 		
 		leg.append("text").attr("class", "legend")
-  	     
-
-
-
-  	/*let buttons = conductors_panel
-  		.selectAll(".control").append("div").attr("class", "conductors")
-  		.data(p).enter()
-  		.append("button")
-  		.text((d)=>d.key)
-  		.attr("type", "button")
-  		.attr("class", "button pressable")
-  		.attr("id", (d)=>d.key)
-  		.style("fill", "gray")
-  		.attr("x", align.width + align.x + 30)
-  		.attr("y", (d,i) => align.y + i*(align.height/principalNames.length))
-  		.attr("text-align", "left")
-  		.attr("text-anchor", "left")
-  		.on("click", (d) =>{
-  			//highlight all years that d is active in
-  			let s = principalConductors[d.key].yearStart;
-  			let e = principalConductors[d.key].yearEnd;
-  			
-  			d3.selectAll(".year").classed("highlight", false);
-  			for (var j = s; j <= e; j++){
-  				d3.select("#year-" + j).classed("highlight", true);
-  			}
-
-  			$("#slider").slideToggle();
-  			$('#slider').attr('height', d3.select('svg-concertyears').node().getBoundingClientRect().height);
-			$("#slider").attr('display', 'visible');
-			$("#slider").html("<br/> About: " + "<br/>"  + parseSlider(d.key));
-
-  		})
-  		.attr('data-tippy-content', (d)=>{
-  			return ("<br/>Total concerts conducted: " + d.value.totalConcerts +"<br/>" + "Total works conducted: " + d.value.totalWorks)})*/
-
-  		
 
   		c_svg.attr("width", d3.select("g#chart-concertyears").node().getBoundingClientRect().width + 30)
       	//.attr("height", d3.select("g.conductors").node().getBBox().height + 30)
