@@ -565,7 +565,17 @@ function graphYears(){
 			//.data(p).enter();
 
 
-    	
+    	var xAxis = d3.axisBottom(x).tickSize([]).tickPadding(5);
+    	var yAxis = d3.axisLeft(y);
+
+    	c_g.append("g").attr("class", "y axis")
+    		.attr("transform", "translate(100,0)")
+        	.call(d3.axisLeft(y))
+        	.selectAll("text")
+        	//.attr("transform", "translate(-10,10)rotate(-45)")
+    	    .style("text-anchor", "end")
+    	    .style("font-size", ".65em")
+    	    .style("fill", "#69a3b2")
 	let c_bars = c_g.append("g")
 		.attr("class", "bars")
 		//.attr("transform", "translate(20, 0)")
@@ -624,17 +634,7 @@ function graphYears(){
 		.selectAll(".legend")*/
 
       
-      	var xAxis = d3.axisBottom(x).tickSize([]).tickPadding(5);
-      	var yAxis = d3.axisLeft(y);
-
-      	c_g.append("g").attr("class", "y axis")
-      		.attr("transform", "translate(100,0)")
-          	.call(d3.axisLeft(y))
-          	.selectAll("text")
-          	//.attr("transform", "translate(-10,10)rotate(-45)")
-      	    .style("text-anchor", "end")
-      	    .style("font-size", ".65em")
-      	    .style("fill", "#69a3b2")
+      	
 
 
       	
