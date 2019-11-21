@@ -1,7 +1,6 @@
 
 var canvas;
 var context;
-//var svg;
 
 //var programArray;
 
@@ -56,20 +55,13 @@ $(window).on('load', function(){
     });
 	initialize();
 });
-/*
-$.getScript("myplugin.js", function() {
-     $.holdReady(false);
-});
-*/
+
+
 function initialize(){
 	
 	
 
 	fetchData();
-	//$.holdReady(true);
-	/*let script = $('#tippylib').addEventListener('load', function(){
-		;
-	})*/
 }
 
 function fetchData(){
@@ -265,20 +257,6 @@ function fetchData(){
 			let cond = data[1][i].conductor;
 			delete row.conductor
 
-			//below is not necessary
-			
-			/*row.totalConducted = 0;
-			
-			
-			//total years, inclusive till end year
-			//very unoptimized but whatever
-			for (j in row.yearEnd - row.yearStart + 1){
-				let progs = years[j + (row.yearStart - foundingYear)];
-				for (k in progs){
-					progs.indexOfPrograms;
-
-				}
-			}*/
 
 			principalConductors[cond] = row;
 
@@ -310,7 +288,9 @@ function graphYears(){
 	
 	let id = "div-concertyears"
 
-	let chart = d3.select("body").append("div")
+	let parentDiv = $('#'+id);
+
+	let chart = d3.select("body")
 		.append("div")
 	  	.attr("class", "svg-container")
 	  	.attr("id", id);
@@ -320,6 +300,7 @@ function graphYears(){
 		//.attr("height", window.innerHeight)
 		.attr("class", "svg")
 		.attr("display", "block")
+		.attr("viewBox", "0 0 " + chart.node().getBoundingClientRect().width+ " " + chart.node().getBoundingClientRect().height )
 		//.attr("viewBox", "0 0 " + width*3/4 + " " + height )
         .attr("preserveAspectRatio", "xMinYMin meet")
         .attr("class", "svg-content-responsive--a")
@@ -353,7 +334,6 @@ function graphYears(){
 	//Object.values(years).map(v => v.value.total)
 	//returns total programs played
 	const colorScaleYears = d3.scaleQuantile()
-	//.domain(Object.values(years).map(v => v.value.total).sort((a,b) => a-b)) //domain with programs
 	.domain(Object.values(years).map(v => v.value.totalConcerts).sort((a,b) => a-b))
 	.range(colorsYears);
 
@@ -365,7 +345,6 @@ function graphYears(){
 			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 			.attr("class", "charts")
 			.attr("id", "chart-concertyears")
-			/*.attr("width")*/
 
 	var axisLabels = g.selectAll(".legend").append("text")
 		.text("Year")
@@ -375,7 +354,7 @@ function graphYears(){
 		.style("text-anchor", "middle")
 		.attr("transform", "translate(" + g.node().getBBox().width/2 + ", -15 )");
 	//maps out years
-	//Object.values(years).map(v => +v.key)
+	
 	var yearLabel = g.append("g").attr("class", "axis").selectAll(".yearLabel")
 		.data(Array.from(Array(10).keys()))
 		.enter().append("text")
@@ -412,13 +391,11 @@ function graphYears(){
         	return margin.left + gridSize + (+d.key % buckets) * gridSize})
         .attr("y", function(d, i){
         	return((Math.floor(+d.key/10) - min) * gridSize)})
-        /*.attr("rx", 4)
-        .attr("ry", 4)*/
         .attr("border-radius", 4)
         .attr("width", gridSize-border)
         .attr("height", gridSize-border)
         .style("fill", function(d,i){
-        	return '#fffeee'//colorScaleYears(d.value.total)
+        	return '#fffeee'
         })
         .attr('data-tippy-content', function(d){return "<br/>Total concerts performed: " + d.value.totalConcerts+"<br/>"})
 
@@ -430,7 +407,7 @@ function graphYears(){
 			$("#slider").slideToggle();
 			$("#slider").attr('display', 'visible');
 			d3.select('#slider').style('height', d3.select('#svg-concertyears').node().getBoundingClientRect().height);
-			$("#slider").html("<br/> <h5>About </h5> " + "<br/>"  + parseSlider(d.key));
+			parseSlider(d, d.key, "years");
 		})
 
 
@@ -449,14 +426,14 @@ function graphYears(){
 
       	legend.append("rect")
       	.attr("class", "legend box border")
-      	.attr("width", gridSize-border)//*10/(colorsYears.length-1))
+      	.attr("width", gridSize-border)
       	.attr("height", gridSize-border)
       	.attr("x", (d,i)=> (margin.left + gridSize+(i*gridSize*10/(colorsYears.length-1))))
       	.attr("y", d3.select(".bars").node().getBBox().height)
       	.style("fill", function(d,i){
       		return i >= 9 ? "00429d" : colorsYears[i];
       	})	//do this because quantiles return n-1, so we have an extra as placeholder
-      	.attr('data-tippy-content', (d, i) => "Total number of years: " + totalYearsInQuantiles[i])	//upper bound  with " + "≤" + Math.ceil(colorScaleYears.quantiles()[i]-1))
+      	.attr('data-tippy-content', (d, i) => "Total number of years: " + totalYearsInQuantiles[i])	//upper bound  with " + "≤" 
 
       	tippy('svg .legend .box')
        // tippy(legend.nodes());
@@ -479,16 +456,11 @@ function graphYears(){
 
   		d3.select(".legend").append("text").attr("class", "legend")
   	      	.text((d) => ("Total concerts played to date: " + years.flatMap(v => v.value.totalConcerts).reduce((a, b) => a + b, 0)))
-  			.attr("x", size.width/2 + size.x)/*function(d, i){
-  				return gridSize*1.5+(gridSize*10/(colorsYears.length-1))})*/
+  			.attr("x", size.width/2 + size.x)
   			.attr("y", d3.select(".legend").node().getBBox().height + 10)
   			.style("font-size", "1em")
   			.style("text-anchor", "middle")
 
-
-      	//let w =  svg.node().getBBox().width/2;// + g.node().getBBox().width/2;
-
-      	//g.attr("transform", "translate(" + w + "," + margin.top + ")")
 		
 		
 		svg.attr("viewBox", "0 0 " + g.node().getBBox().width  + " " + (g.node().getBBox().y + +g.node().getBBox().height + 30))
@@ -565,17 +537,18 @@ function graphYears(){
 			//.data(p).enter();
 
 
-    	var xAxis = d3.axisBottom(x).tickSize([]).tickPadding(5);
-    	var yAxis = d3.axisLeft(y);
+	var xAxis = d3.axisBottom(x).tickSize([]).tickPadding(5);
+	var yAxis = d3.axisLeft(y);
 
-    	c_g.append("g").attr("class", "y axis")
-    		.attr("transform", "translate(100,0)")
-        	.call(d3.axisLeft(y))
-        	.selectAll("text")
-        	//.attr("transform", "translate(-10,10)rotate(-45)")
-    	    .style("text-anchor", "end")
-    	    .style("font-size", ".65em")
-    	    .style("fill", "#69a3b2")
+	c_g.append("g").attr("class", "y axis")
+		.attr("transform", "translate(100,0)")
+    	.call(d3.axisLeft(y))
+    	.selectAll("text")
+    	//.attr("transform", "translate(-10,10)rotate(-45)")
+	    .style("text-anchor", "end")
+	    .style("font-size", ".65em")
+	    .style("fill", "#69a3b2")
+	    
 	let c_bars = c_g.append("g")
 		.attr("class", "bars")
 		//.attr("transform", "translate(20, 0)")
@@ -628,15 +601,7 @@ function graphYears(){
   		  .delay()
 
   		
-    	/*var legend = g.append("g")
-		.attr("class", "legend")
-		.attr("transform", "translate(20,50)")// + 0 + ")")
-		.selectAll(".legend")*/
-
-      
-      	
-
-
+    
       	
       	var c_legend = c_g.append("g")
 			.attr("class", "legend")
@@ -648,7 +613,7 @@ function graphYears(){
 
       	leg.append("rect")
       	.attr("class", "legend box border highlight--p")
-      	.attr("width", gridSize-border)//*10/(colorsYears.length-1))
+      	.attr("width", gridSize-border)
       	.attr("height", gridSize-border)
       	.attr("x", (d)=> x(0))
       	.attr("y", d3.select("#legend-year").node().getBBox().y + (gridSize)*3/4)
@@ -688,24 +653,17 @@ function graphYears(){
 		leg.append("text").attr("class", "legend")
 
   		c_svg.attr("width", d3.select("g#chart-concertyears").node().getBoundingClientRect().width + 30)
-      	//.attr("height", d3.select("g.conductors").node().getBBox().height + 30)
-  		
-  		/*.attr("x", 15)
-  		.attr("y", (d, i) => i*20)*/
+      	
 
     SVGS[id] = svg;
-/*    d3.select("body").on("click", ()=>{
-		var outside = d3.selectAll(".year").filter(d3.event.target).empty();//#tooltip, #tooltip *").filter(equalToEventTarget).empty();
-		    if (outside) {
-		        d3.selectAll(".year").classed("highlight", false);
-		    }
-	})*/
+
 }
 
 
 //
 function parseSlider(data){
-	;
+	$("#slider")
+	$("#slider").append("<br/> <h5>About </h5> " + "<br/>"  + parseSlider(d.key));
 }
 
 
@@ -714,11 +672,7 @@ function redraw(){
 	$("body").attr("width", window.innerWidth);
 	$("body").attr("height", window.innerHeight);
 
-	/*width = window.innerWidth - margin.left - margin.right;
-	height = window.innerHeight - margin.top - margin.bottom;
-
-	d3.select('.svg-content-responsive--a').attr("height", d3.select("g.charts").node().getBBox().height + 30)
-	d3.select('.svg-content-responsive--b').attr("width", d3.select("g#chart-concertyears").node().getBoundingClientRect().width + 30)*/
+	
 
 }
 window.addEventListener("resize", redraw);
