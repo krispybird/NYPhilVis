@@ -290,10 +290,11 @@ function graphYears(){
 
 	let parentDiv = $('#'+id);
 
-	let chart = d3.select("body")
+	let chart = d3.select("#"+id);
+		/*d3.select("body")
 		.append("div")
 	  	.attr("class", "svg-container")
-	  	.attr("id", id);
+	  	.attr("id", id);*/
 
 	let svg = chart.append("svg")
 		//.attr("width", window.innerWidth * .9)
@@ -306,9 +307,9 @@ function graphYears(){
         .attr("class", "svg-content-responsive--a")
         .attr('id', 'svg-concertyears')
 
-	let toolbar = chart.append("div")
+	/*let toolbar = chart.append("div")
 			.attr("class", "toolbar--b")
-			.attr("display", "none")
+			.attr("display", "none")*/
 
 	//redefine this to be the size of the svg instead
 	let border = 2;
@@ -407,6 +408,7 @@ function graphYears(){
 			$("#slider").slideToggle();
 			$("#slider").attr('display', 'visible');
 			d3.select('#slider').style('height', d3.select('#svg-concertyears').node().getBoundingClientRect().height);
+			//d3.select('#slider').style('top', d3.select('#svg-concertyears').node().getBoundingClientRect().x + "px");
 			parseSlider(d, d.key, "years");
 		})
 
@@ -499,17 +501,35 @@ function graphYears(){
     	.attr("class", "svg-content-responsive--b")
 		.attr("id", "svg-principal-conductors")
 		.attr("height", svg.node().getBBox().height)
+		//.attr("viewBox", "0 0 " + chart.node().getBoundingClientRect().width+ " " + chart.node().getBoundingClientRect().height )
         
 
 	let align = c_svg.node().getBBox();
 
-	c_svg.append("text")
+	c_svg.append("text").attr("id", "title-conductor")
 	.attr("transform", "translate(" + align.x + "," + align.y + ")")
 	.text("Principal Conductors x Concerts Conducted")
-	.attr("x", align.x + 30)
-	.attr("y", align.y + 25)
-	.style("font-size", "1.15em")
+	.attr("x", align.x + 10)
+	.attr("y", align.y + 15)
+	.style("font-size", ".8em")
 	.style("text-anchor", "left")
+
+	/*c_svg.append("text")
+	.attr("transform", "translate(" + align.x + "," + align.y + ")")
+	.text("x")
+	.attr("x", align.x+50)
+	.attr("y", align.y + 15)
+	.attr("fill", "red")
+	.style("font-size", "1.25em")
+	.style("text-anchor", "middle")
+
+	c_svg.append("text")
+	.attr("transform", "translate(" + align.x + "," + align.y + ")")
+	.text("Concerts Conducted")
+	.attr("x", align.x + 30)
+	.attr("y", align.y + 35)
+	.style("font-size", ".9em")
+	.style("text-anchor", "left")*/
 
 	//ratchet way of making some bars
 	let maxWidthOfBars = c_svg.node().getBoundingClientRect().width - 30;
@@ -587,6 +607,18 @@ function graphYears(){
 
 
   		})
+  		.on("click", (d)=>{
+  			if (!$("#slider").is(':visible')){
+  				$("#slider").show();
+  			}
+  			//$("#slider").attr('display', 'visible');
+
+
+
+  			d3.select('#slider').style('height', d3.select('#svg-concertyears').node().getBoundingClientRect().height);
+  			//d3.select('#slider').style('top', d3.select('#svg-concertyears').node().getBoundingClientRect().x + "px");
+  			parseSlider(d, d.key, "conductors");
+  		})
   		.attr('data-tippy-content', (d)=>{
   			return ("<br/>Total concerts conducted: " + d.value.totalConcerts +"<br/>" + "Total works conducted: " + d.value.totalWorks)})
 
@@ -652,18 +684,38 @@ function graphYears(){
 		
 		leg.append("text").attr("class", "legend")
 
-  		c_svg.attr("width", d3.select("g#chart-concertyears").node().getBoundingClientRect().width + 30)
+  		c_svg.attr("width", d3.select("#title-conductor").node().getBoundingClientRect().width + 50)
+  			.attr("height", d3.select("g.charts").node().getBBox().height + 30)
       	
 
+
     SVGS[id] = svg;
+
+   	$("#div-concertyears").attr("height", $("#svg-concertyears")[0].getBoundingClientRect().height + "px")
 
 }
 
 
 //
-function parseSlider(data){
-	$("#slider")
-	$("#slider").append("<br/> <h5>About </h5> " + "<br/>"  + parseSlider(d.key));
+function parseSlider(data, key, theme){
+	//if theme == years, show the years, otherwise show the conductor
+	
+	let compName = key;
+	if (theme == "conductors"){
+		compName = compName.split(",")
+		let srcNum = Object.keys(principalConductors).indexOf(key)
+		let srcName = compName[0].replace(/ /g, "").toLowerCase();
+		
+
+		$("#composer-photo").attr("src", "img/" + srcNum + "_" + srcName + ".jpg?");
+		$("#slider-text").html("<h5>Principal Conductor: " + compName[1] + " " + compName[0] + "</h5><br/>");
+		$("#slider-text").append("<b>" + principalConductors[key].dob +"-" + principalConductors[key].dod + "</p>")
+		$("#slider-text").append("<b>Years active as principal conductor: " + principalConductors[key].yearStart + " to " + principalConductors[key].yearEnd + "</b><br/>")
+		$("#slider-text").append("<p>" + principalConductors[key].description +"</p>")
+		$("#slider-text").append("<p>" + "-Description from " + "<a href = " + principalConductors[key].url + ">nyphil.org</a>" +"</p>")
+	}
+	
+	//$("#slider-text").append(" parseSlider(d.key));
 }
 
 
@@ -671,6 +723,7 @@ function parseSlider(data){
 function redraw(){
 	$("body").attr("width", window.innerWidth);
 	$("body").attr("height", window.innerHeight);
+	$("#div-concertyears").attr("height", $("#svg-concertyears")[0].getBoundingClientRect().height + "px")
 
 	
 
