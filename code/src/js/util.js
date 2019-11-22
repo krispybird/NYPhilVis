@@ -56,4 +56,30 @@ function sumToQuantileRanges(sumArr, quantArr, field){
 	return totalArr;
 }
 
+function sortArr(arr, sortVal, sortDir){
+	let sortedArr = arr.sort(function(a,b){
+		if (sortDir = "d"){
+			return b.value[sortVal] - a.value[sortVal];
+		}
+		else{
+			return a.value[sortVal] - b.value[sortVal];
+		}
+		});
+	return sortedArr;
+}
 
+var composersByPerformances, conductorsByPerformances;	//counting in terms of total works that he has performed
+function graphComposersToConductors(){
+	composersByPerformances = sortArr(Object.entries(composerMetadata).map(([key, value]) => ({key,value})), "totalPerformance", "d");
+
+	conductorsByPerformances = sortArr(Object.entries(conductorMetadata).map(([key, value]) => ({key,value})), "totalWorks", "d");
+
+	numberToCompare = 30;
+	let topComposers = composersByPerformances.slice(0, numberToCompare);
+	let topConductors = conductorsByPerformances.slice(0, numberToCompare)
+	console.log(topComposers);
+	console.log(topConductors);
+
+
+	//composerArr.sort((a,b)=> (b.value.totalPerformance - a.value.totalPerformance))
+}

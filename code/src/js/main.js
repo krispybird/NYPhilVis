@@ -3,7 +3,7 @@ var canvas;
 var context;
 
 //var programArray;
-
+var numberOfComposersToCompare = 1;
 
 var programs, years, concerts= [];	//stored 
 var tempProgs = {};
@@ -265,7 +265,7 @@ function fetchData(){
 
 		
 		
-	}).then(()=>graphYears())/*.then((d) => graphTopWorks());*/
+	}).then(()=>graphYears()).then((d) => graphComposersToConductors());
 
 
 }
@@ -705,11 +705,12 @@ function parseSlider(data, key, theme){
 		compName = compName.split(",")
 		let srcNum = Object.keys(principalConductors).indexOf(key)
 		let srcName = compName[0].replace(/ /g, "").toLowerCase();
+		let lifeSpan = principalConductors[key].dob +"-" + principalConductors[key].dod;
 		
 
 		$("#composer-photo").attr("src", "img/" + srcNum + "_" + srcName + ".jpg?");
-		$("#slider-text").html("<h5>Principal Conductor: " + compName[1] + " " + compName[0] + "</h5><br/>");
-		$("#slider-text").append("<b>" + principalConductors[key].dob +"-" + principalConductors[key].dod + "</p>")
+		$("#slider-text").html("<h5>Principal Conductor: " + compName[1] + " " + compName[0] + " (" + lifeSpan + ")</h5><br/>");
+		//$("#slider-text").append("<b>" + principalConductors[key].dob +"-" + principalConductors[key].dod + "</p>")
 		$("#slider-text").append("<b>Years active as principal conductor: " + principalConductors[key].yearStart + " to " + principalConductors[key].yearEnd + "</b><br/>")
 		$("#slider-text").append("<p>" + principalConductors[key].description +"</p>")
 		$("#slider-text").append("<p>" + "-Description from " + "<a href = " + principalConductors[key].url + ">nyphil.org</a>" +"</p>")
