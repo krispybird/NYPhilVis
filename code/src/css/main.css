@@ -12,8 +12,8 @@ html {
 }
 
 body {
-	color: black;
-
+	color: #c5c5c5;
+	background-color: #1c1c1c;
 	/* layout */
 	padding: 0;
 	margin: 0;
@@ -27,6 +27,8 @@ body {
 	text-anchor: left;
 	/*//min-width:  1200px;
 	/*min-height: 700px;*/
+
+	fill: #c5c5c5;
 }
 
 
@@ -152,7 +154,7 @@ svg {
 button {
 	border: none;
 	background: rgba(241, 241, 241, 0.67);
-	color: gray;
+	/*color: gray;*/
 	cursor: pointer;
 
 	float: left;
@@ -171,7 +173,7 @@ button {
 
 h1 {
 
-	color: black;
+	/*color: black;*/
 	/* layout */
 	margin: 0;
 	padding-top: 0.15em;
@@ -309,7 +311,7 @@ g{
   text-shadow: 0 1px 0 #fff;
   font-size: 10px;
   font-weight: 500;
-  color: #000;
+  /*color: #000;*/
 }
 
 p{
@@ -344,7 +346,7 @@ div{
 	float: right;
     overflow: auto;
 	opacity: 1;
-    color: #000000;
+    /*color: #000000;*/
     padding: 10px;
 	position: absolute;
 	right: 0;
@@ -352,7 +354,7 @@ div{
 	
 	text-align: justified;
 	/*font: 12px sans-serif;*/        
-	background: #f0f0f0;
+	background: #2d2d2d;
 	font-size: .75em;
 
 }
@@ -363,20 +365,27 @@ div{
 	object-fit: contain;
 }
 
+a:-webkit-any-link {
+	color: #f0a73a !important;
+}
+
 rect.border{
 	/*border: #E6E6E6;
 	border-width: 2px;*/
 	/*stroke: #cececec7;*/
-	stroke:#ffffff;
+	/*stroke:#ffffff;*/
     stroke-width:2px;
+    rx: 2px;
+    ry: 2px;
     
 }
 
 rect.highlight{
 	/*border: #E6E6E6;
 	border-width: 2px;*/
-	stroke: #FFDF00;
+	/*stroke: #FFDF00;*/
     stroke-width:3px;
+
    
 }
 
@@ -400,6 +409,6 @@ rect.highlight--s{
 	font: .8em sans-serif;
 	text-align: center;
 	font-family: 'Forum', cursive;
-	color: #919191;
+	/*color: #919191;*/
 }
 

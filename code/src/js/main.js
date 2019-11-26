@@ -404,13 +404,13 @@ function graphYears(){
         	return colorScaleYears(d.value.totalConcerts)
         })
 
-        bars.on("click", function(d) {
+        /*bars.on("click", function(d) {
 			$("#slider").slideToggle();
 			$("#slider").attr('display', 'visible');
 			d3.select('#slider').style('height', d3.select('#svg-concertyears').node().getBoundingClientRect().height);
 			//d3.select('#slider').style('top', d3.select('#svg-concertyears').node().getBoundingClientRect().x + "px");
 			parseSlider(d, d.key, "years");
-		})
+		})*/
 
 
 
@@ -513,6 +513,7 @@ function graphYears(){
 	.attr("y", align.y + 15)
 	.style("font-size", ".8em")
 	.style("text-anchor", "left")
+	.style("fill", "#c5c5c5")
 
 	/*c_svg.append("text")
 	.attr("transform", "translate(" + align.x + "," + align.y + ")")
